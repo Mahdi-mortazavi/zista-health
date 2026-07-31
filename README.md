@@ -126,12 +126,14 @@ If `TURNSTILE_SECRET` is unset the Worker skips verification entirely. If
 
 ### 4 — `LEADS` KV namespace
 
+Already created as `zista-health-LEADS` and bound in `wrangler.jsonc`. To make
+another one:
+
 ```bash
 npx wrangler kv namespace create LEADS
 ```
 
-Paste the returned id into `wrangler.jsonc`, replacing
-`REPLACE_WITH_YOUR_KV_NAMESPACE_ID`. This namespace does two jobs: it stores
+This namespace does two jobs: it stores
 every submission (`lead:<iso-timestamp>:<rand>`) so a Telegram outage never
 loses a lead, and it holds the per-IP rate-limit counters (`rl:<ip>`,
 5 requests per 10 minutes, `expirationTtl` does the cleanup).
@@ -142,45 +144,55 @@ Cloudflare dashboard → Web Analytics → add a site → copy the token into `.
 Cookie-free, so there is no consent banner. The beacon is injected after the
 `load` event, so it never touches first paint.
 
-### For GitHub Actions
+### Where each value actually lives
 
-Repository → Settings → Secrets and variables → Actions:
+| Value | Where | Why there |
+|---|---|---|
+| `SITE_URL` | Cloudflare → Settings → **Build** → Variables | needed at build time, not runtime |
+| `TELEGRAM_CHAT_ID` | Cloudflare → Settings → **Variables and secrets** | runtime, plaintext — an identifier, not a credential |
+| `TELEGRAM_BOT_TOKEN` | same panel, added with **Type: Secret** | runtime, encrypted, never readable again |
+| `TURNSTILE_SECRET` | same panel, **Type: Secret** | runtime, encrypted |
+| `PUBLIC_TURNSTILE_SITE_KEY` | Build variable | baked into the HTML, public by design |
 
-| Kind | Name |
-|---|---|
-| Secret | `CLOUDFLARE_API_TOKEN` (needs *Workers Scripts: Edit* + *Workers KV Storage: Edit*) |
-| Secret | `CLOUDFLARE_ACCOUNT_ID` |
-| Variable | `SITE_URL`, `PUBLIC_TURNSTILE_SITE_KEY`, `PUBLIC_CF_ANALYTICS_TOKEN` |
-
-Worker secrets (`TELEGRAM_*`, `TURNSTILE_SECRET`) are set with
-`wrangler secret put`, not in CI. They live in Cloudflare, not in this repo.
+Nothing secret is in this repository, and nothing secret goes in GitHub — the
+Cloudflare build has its own scoped token, created automatically when the repo
+was connected.
 
 ---
 
 ## Deploying
+
+**This is already live.** Cloudflare Workers Builds is connected to this
+repository and redeploys on every push to `main`:
+
+    https://zista-health.mahdi-mortazavi-135.workers.dev
+
+Nothing needs to run on your machine. Cloudflare clones the repo, runs
+`npm run build`, then `npx wrangler deploy`. Watch a build at
+Workers & Pages → `zista-health` → Deployments.
+
+`.github/workflows/ci.yml` runs the same build plus a type check and Lighthouse
+CI on every push, so a regression shows up in GitHub before Cloudflare ships it.
+It deliberately does **not** deploy; that would be two systems racing to publish
+the same commit.
+
+To deploy by hand instead (needs `wrangler login` once):
 
 ```bash
 npm run build
 npx wrangler deploy
 ```
 
-Both work from a clean clone. `wrangler.jsonc` binds `./dist` as static assets
-and routes only `/api/*` through the Worker, so every page is served from the
-edge cache without invoking a single line of JavaScript on the server.
-
-Pushing to `main` runs `.github/workflows/deploy.yml`: install → type check →
-build → Lighthouse CI (which starts a real `wrangler dev` and fails the job if
-any category drops below 100) → deploy.
-
 ### Custom domain
 
 1. Add the domain to your Cloudflare account (Websites → Add a site) and move
    the nameservers.
-2. Workers & Pages → `zista-health` → Settings → Domains & Routes → *Add custom
-   domain*. Cloudflare creates the DNS record and the certificate.
-3. Set `SITE_URL` in `.env` and in the GitHub Actions variables, then rebuild.
-   Canonical URLs, `hreflang`, the sitemap, the JSON-LD `@id`s and the OG image
-   URLs all derive from it.
+2. Workers & Pages → `zista-health` → Domains → *Add custom domain*. Cloudflare
+   creates the DNS record and the certificate.
+3. Change the `SITE_URL` **build variable** (Settings → Build → Variables and
+   secrets) to the new origin and redeploy. Canonical URLs, `hreflang`, the
+   sitemap, the JSON-LD `@id`s and the OG image URLs all derive from it. It is
+   currently set to the workers.dev preview URL.
 
 ### Domain suggestions, in order
 

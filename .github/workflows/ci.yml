@@ -1,16 +1,22 @@
-name: Deploy
+name: CI
+
+# Deployment is NOT done here. Cloudflare Workers Builds is connected directly
+# to this repository and deploys every push to `main` itself (Workers & Pages →
+# zista-health → Settings → Build). This workflow only guards quality, so a bad
+# commit is visible in the PR before Cloudflare ships it.
 
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 concurrency:
-  group: deploy-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
+  verify:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -37,16 +43,9 @@ jobs:
           PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.PUBLIC_TURNSTILE_SITE_KEY }}
           PUBLIC_CF_ANALYTICS_TOKEN: ${{ vars.PUBLIC_CF_ANALYTICS_TOKEN }}
 
-      # Lighthouse runs against the built static output, before anything is
-      # deployed. The budgets in lighthouserc.json fail the job, not warn.
+      # Starts a real `wrangler dev` and fails the job if any Lighthouse
+      # category drops below 100. See lighthouserc.json.
       - name: Lighthouse CI
         run: npx --yes @lhci/cli@0.14.x autorun
         env:
           LHCI_BUILD_CONTEXT__CURRENT_BRANCH: ${{ github.ref_name }}
-
-      - name: Deploy to Cloudflare Workers
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy
