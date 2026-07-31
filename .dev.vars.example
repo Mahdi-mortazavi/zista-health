@@ -1,0 +1,12 @@
+# Copy to .dev.vars for local `wrangler dev`. NEVER commit .dev.vars.
+# All four are optional: with none of them set the form still validates,
+# still stores to the local KV, and the client degrades to a mailto: link.
+
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_CHAT_ID=
+TURNSTILE_SECRET=
+
+# Build-time, public (baked into the HTML, not secret):
+#   PUBLIC_TURNSTILE_SITE_KEY=
+#   PUBLIC_CF_ANALYTICS_TOKEN=
+# Put those in .env instead — see README.

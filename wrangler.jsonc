@@ -1,0 +1,35 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "zista-health",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-07-31",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // Static Assets binding. `npm run build` writes ./dist; the Worker only
+  // sees a request when no asset matches, or for /api/*.
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash",
+    "run_worker_first": ["/api/*"]
+  },
+
+  // Leads backup + IP rate-limit counters.
+  // Create with:  npx wrangler kv namespace create LEADS
+  // then paste the returned id below.
+  "kv_namespaces": [
+    {
+      "binding": "LEADS",
+      "id": "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+    }
+  ],
+
+  "observability": { "enabled": true },
+
+  // Secrets are never stored here. See README:
+  //   npx wrangler secret put TELEGRAM_BOT_TOKEN
+  //   npx wrangler secret put TELEGRAM_CHAT_ID
+  //   npx wrangler secret put TURNSTILE_SECRET
+  "vars": {}
+}

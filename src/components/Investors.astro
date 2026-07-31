@@ -1,0 +1,160 @@
+---
+import type { Copy } from '../content/types';
+import Icons from './Icons.astro';
+
+interface Props {
+  copy: Copy;
+}
+const { copy: c } = Astro.props;
+---
+
+<section class="section invest" id="invest" aria-labelledby="invest-h">
+  <div class="wrap">
+    <p class="eyebrow reveal">{c.investors.eyebrow}</p>
+    <h2 class="h2 measure reveal" id="invest-h">{c.investors.h2}</h2>
+    <p class="lead measure reveal intro">{c.investors.summary}</p>
+
+    <dl class="blocks">
+      {c.investors.blocks.map((b, i) => (
+        <div class="block reveal" style={`--d:${i * 45}ms`}>
+          <dt class="h3">{b.title}</dt>
+          <dd class="body">{b.body}</dd>
+        </div>
+      ))}
+    </dl>
+
+    <div class="founder card reveal">
+      <p class="founder-name">{c.investors.founder.name}</p>
+      <p class="founder-role">{c.investors.founder.role}</p>
+      <p class="founder-body">{c.investors.founder.body}</p>
+      <ul class="founder-links">
+        <li>
+          <a href={c.channels.telegram.href} rel="me noopener">
+            <Icons name="telegram" size={18} />{c.floating.telegram}
+          </a>
+        </li>
+        <li>
+          <a href={c.channels.github.href} rel="me noopener">
+            <Icons name="github" size={18} />GitHub
+          </a>
+        </li>
+        <li>
+          <a href={c.channels.email.href}>
+            <Icons name="mail" size={18} />Email
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <p class="no-numbers reveal">{c.investors.noNumbers}</p>
+  </div>
+</section>
+
+<style>
+  .invest {
+    background: var(--color-bg-primary);
+    border-block: 1px solid var(--color-separator);
+  }
+
+  h2 {
+    margin: 0.75rem 0 0;
+  }
+
+  .intro {
+    margin-block: 1.25rem 0;
+  }
+
+  .blocks {
+    margin: clamp(2.5rem, 5vw, 3.5rem) 0 0;
+    display: grid;
+    gap: 0;
+  }
+
+  .block {
+    padding-block: 1.5rem;
+    border-block-start: 1px solid var(--color-separator);
+    transition-delay: var(--d, 0ms);
+  }
+
+  .block:last-child {
+    border-block-end: 1px solid var(--color-separator);
+  }
+
+  dt {
+    margin: 0 0 0.5rem;
+  }
+
+  dd {
+    margin: 0;
+    color: var(--color-label-2);
+    max-width: var(--measure);
+  }
+
+  .founder {
+    margin-block-start: 2.5rem;
+    max-width: var(--measure);
+  }
+
+  .founder-name {
+    margin: 0;
+    font-size: 1.1875rem;
+    font-weight: 660;
+    letter-spacing: -0.014em;
+  }
+
+  :global(html[lang='fa']) .founder-name {
+    letter-spacing: 0;
+  }
+
+  .founder-role {
+    margin: 0.125rem 0 0.875rem;
+    color: var(--color-tint);
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  .founder-body {
+    margin: 0;
+    color: var(--color-label-2);
+  }
+
+  .founder-links {
+    list-style: none;
+    margin: 1.25rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+  }
+
+  .founder-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--color-tint);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    text-decoration: none;
+  }
+
+  .founder-links a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .no-numbers {
+    margin: 2rem 0 0;
+    color: var(--color-label-2);
+    max-width: var(--measure);
+    font-size: 0.9375rem;
+  }
+
+  @media (min-width: 48rem) {
+    .block {
+      display: grid;
+      grid-template-columns: minmax(14rem, 20rem) 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+  }
+</style>

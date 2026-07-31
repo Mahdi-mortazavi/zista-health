@@ -1,0 +1,70 @@
+---
+import type { Copy } from '../content/types';
+
+interface Props {
+  copy: Copy;
+}
+const { copy: c } = Astro.props;
+---
+
+<!--
+  Deliberately not an accordion. Every answer is visible in the served HTML and
+  is written to make sense quoted on its own, because that is what an AI
+  assistant will do with it.
+-->
+<section class="section" id="faq" aria-labelledby="faq-h">
+  <div class="wrap">
+    <p class="eyebrow reveal">{c.faq.eyebrow}</p>
+    <h2 class="h2 measure reveal" id="faq-h">{c.faq.h2}</h2>
+
+    <div class="items">
+      {c.faq.items.map((item, i) => (
+        <article class="item reveal" style={`--d:${(i % 2) * 45}ms`}>
+          <h3 class="h3">{item.q}</h3>
+          <p class="answer">{item.a}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  h2 {
+    margin: 0.75rem 0 0;
+  }
+
+  .items {
+    margin-block-start: clamp(2.5rem, 5vw, 3.5rem);
+    display: grid;
+    gap: 0;
+  }
+
+  .item {
+    padding-block: 1.5rem;
+    border-block-start: 1px solid var(--color-separator);
+    transition-delay: var(--d, 0ms);
+  }
+
+  .item:last-child {
+    border-block-end: 1px solid var(--color-separator);
+  }
+
+  .item h3 {
+    margin: 0 0 0.5rem;
+  }
+
+  .answer {
+    margin: 0;
+    color: var(--color-label-2);
+    max-width: var(--measure);
+  }
+
+  @media (min-width: 48rem) {
+    .item {
+      display: grid;
+      grid-template-columns: minmax(14rem, 22rem) 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+  }
+</style>

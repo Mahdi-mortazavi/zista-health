@@ -1,0 +1,74 @@
+---
+import type { Copy } from '../content/types';
+
+interface Props {
+  copy: Copy;
+}
+const { copy: c } = Astro.props;
+---
+
+<section class="section how" id="how" aria-labelledby="how-h">
+  <div class="wrap">
+    <p class="eyebrow reveal">{c.how.eyebrow}</p>
+    <h2 class="h2 measure reveal" id="how-h">{c.how.h2}</h2>
+
+    <ol class="steps">
+      {c.how.steps.map((s, i) => (
+        <li class="step reveal" style={`--d:${i * 60}ms`}>
+          <span class="n" aria-hidden="true">{s.n}</span>
+          <h3 class="h3">{s.title}</h3>
+          <p class="body">{s.body}</p>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .how {
+    background: var(--color-bg-primary);
+    border-block: 1px solid var(--color-separator);
+  }
+
+  h2 {
+    margin: 0.75rem 0 0;
+  }
+
+  .steps {
+    list-style: none;
+    margin: clamp(2.5rem, 5vw, 3.5rem) 0 0;
+    padding: 0;
+    display: grid;
+    gap: clamp(2rem, 4vw, 2.5rem);
+    counter-reset: step;
+  }
+
+  .step {
+    transition-delay: var(--d, 0ms);
+  }
+
+  .n {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--color-tint);
+    font-variant-numeric: tabular-nums;
+    margin-block-end: 0.75rem;
+  }
+
+  .step h3 {
+    margin: 0 0 0.5rem;
+  }
+
+  .body {
+    margin: 0;
+    color: var(--color-label-2);
+    max-width: 40ch;
+  }
+
+  @media (min-width: 48rem) {
+    .steps {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>

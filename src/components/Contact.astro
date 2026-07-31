@@ -1,0 +1,422 @@
+---
+import type { Copy } from '../content/types';
+import Icons from './Icons.astro';
+
+interface Props {
+  copy: Copy;
+}
+const { copy: c } = Astro.props;
+
+const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? '';
+const mailto = c.channels.email.href;
+
+const channels = [
+  { key: 'telegram', ...c.channels.telegram },
+  { key: 'whatsapp', ...c.channels.whatsapp },
+  { key: 'phone', ...c.channels.phone },
+  { key: 'mail', ...c.channels.email },
+  { key: 'github', ...c.channels.github },
+] as const;
+---
+
+<section class="section contact" id="contact" aria-labelledby="contact-h">
+  <div class="wrap">
+    <p class="eyebrow reveal">{c.contact.eyebrow}</p>
+    <h2 class="h2 measure reveal" id="contact-h">{c.contact.h2}</h2>
+    <p class="lead measure reveal intro">{c.contact.intro}</p>
+
+    <div class="cols">
+      <div class="col reveal">
+        <h3 class="label">{c.contact.channelsLabel}</h3>
+        <ul class="channels">
+          {channels.map((ch) => (
+            <li>
+              <a href={ch.href} rel={ch.key === 'github' || ch.key === 'telegram' || ch.key === 'whatsapp' ? 'noopener' : undefined}>
+                <span class="ico"><Icons name={ch.key as any} size={20} /></span>
+                <span>{ch.label}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        <a class="one-pager" href={c.contact.onePager.href}>
+          {c.contact.onePager.label}
+          <Icons name="arrow" size={18} />
+        </a>
+
+        <p class="founder-line">{c.contact.founderLine}</p>
+      </div>
+
+      <div class="col reveal">
+        <h3 class="label">{c.contact.formLabel}</h3>
+
+        <form
+          id="contact-form"
+          novalidate
+          data-sitekey={siteKey}
+          data-mailto={mailto}
+          data-sending={c.contact.sending}
+          data-success={c.contact.success}
+          data-error={c.contact.error}
+          data-fallback={c.contact.mailtoFallback}
+          data-required={c.contact.required}
+        >
+          <p class="progress" aria-hidden="true">
+            <span class="dot on"></span><span class="dot on"></span><span class="dot"></span>
+            <span class="progress-text">{c.contact.progress}</span>
+          </p>
+
+          <div class="row">
+            <label for="f-name">{c.contact.fields.name}</label>
+            <input class="field" id="f-name" name="name" type="text" autocomplete="name" required
+              placeholder={c.contact.fields.namePlaceholder} maxlength="120" />
+          </div>
+
+          <div class="row">
+            <label for="f-reach">{c.contact.fields.reach}</label>
+            <input class="field" id="f-reach" name="reach" type="text" required
+              placeholder={c.contact.fields.reachPlaceholder} maxlength="160" />
+          </div>
+
+          <div class="row">
+            <label for="f-role">{c.contact.fields.role}</label>
+            <select class="field" id="f-role" name="role">
+              {c.contact.roles.map((r) => <option value={r.value}>{r.label}</option>)}
+            </select>
+          </div>
+
+          <div class="row">
+            <label for="f-message">{c.contact.fields.message}</label>
+            <textarea class="field" id="f-message" name="message" rows="4" required
+              placeholder={c.contact.fields.messagePlaceholder} maxlength="4000"></textarea>
+          </div>
+
+          <div class="hp" aria-hidden="true">
+            <label for="f-company">Company</label>
+            <input id="f-company" name="company" type="text" tabindex="-1" autocomplete="off" />
+          </div>
+
+          <div id="ts-widget"></div>
+
+          <button class="btn btn-primary submit" type="submit">{c.contact.submit}</button>
+
+          <p class="consent">{c.contact.consent}</p>
+          <p class="status" id="form-status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const form = document.getElementById('contact-form') as HTMLFormElement | null;
+  if (form) {
+    const statusEl = document.getElementById('form-status')!;
+    const button = form.querySelector('.submit') as HTMLButtonElement;
+    const submitLabel = button.textContent || '';
+    const sendingLabel = form.dataset.sending || '…';
+    const siteKey = form.dataset.sitekey || '';
+    const mailto = form.dataset.mailto || '';
+
+    // Path cards preselect the role, so the form opens already at step 2.
+    document.querySelectorAll<HTMLAnchorElement>('a[data-path]').forEach((a) => {
+      a.addEventListener('click', () => {
+        const role = document.getElementById('f-role') as HTMLSelectElement | null;
+        if (role && a.dataset.path) role.value = a.dataset.path;
+        setTimeout(() => (document.getElementById('f-message') as HTMLTextAreaElement)?.focus(), 500);
+      });
+    });
+
+    // ── Turnstile, loaded only when someone actually starts writing. ────────
+    let tsId: string | null = null;
+    let tsToken = '';
+    let waiters: ((t: string) => void)[] = [];
+
+    function onToken(t: string) {
+      tsToken = t;
+      waiters.splice(0).forEach((r) => r(t));
+    }
+
+    function loadTurnstile() {
+      if (!siteKey || tsId !== null || (window as any).__tsLoading) return;
+      (window as any).__tsLoading = true;
+      (window as any).onZistaTurnstile = () => {
+        tsId = (window as any).turnstile.render('#ts-widget', {
+          sitekey: siteKey,
+          appearance: 'interaction-only',
+          callback: onToken,
+          'expired-callback': () => (tsToken = ''),
+          'error-callback': () => (tsToken = ''),
+        });
+      };
+      const s = document.createElement('script');
+      s.src =
+        'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onZistaTurnstile';
+      s.async = true;
+      s.defer = true;
+      document.head.appendChild(s);
+    }
+
+    form.addEventListener('focusin', loadTurnstile, { once: true });
+
+    function token(): Promise<string> {
+      if (!siteKey) return Promise.resolve('');
+      if (tsToken) return Promise.resolve(tsToken);
+      loadTurnstile();
+      return new Promise((resolve) => {
+        waiters.push(resolve);
+        setTimeout(() => resolve(tsToken), 8000);
+        const t = window.setInterval(() => {
+          if (tsId !== null) {
+            window.clearInterval(t);
+            try {
+              (window as any).turnstile.execute(tsId);
+            } catch {
+              /* widget already solved */
+            }
+          }
+        }, 250);
+        setTimeout(() => window.clearInterval(t), 8000);
+      });
+    }
+
+    function fallback(data: Record<string, string>) {
+      const subject = encodeURIComponent(`Zista — ${data.role || 'contact'} — ${data.name || ''}`);
+      const body = encodeURIComponent(
+        `${data.name || ''}\n${data.reach || ''}\n${data.role || ''}\n\n${data.message || ''}`
+      );
+      return `${mailto}?subject=${subject}&body=${body}`;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      statusEl.className = 'status';
+      statusEl.textContent = '';
+
+      const fd = new FormData(form);
+      const data = Object.fromEntries(
+        [...fd.entries()].map(([k, v]) => [k, String(v)])
+      ) as Record<string, string>;
+
+      if (!data.name?.trim() || !data.reach?.trim() || !data.message?.trim()) {
+        statusEl.className = 'status is-error';
+        statusEl.textContent = form.dataset.required || '';
+        (form.querySelector(':invalid, .field') as HTMLElement)?.focus();
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = sendingLabel;
+
+      try {
+        data.turnstile = await token();
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error(String(res.status));
+        statusEl.className = 'status is-ok';
+        statusEl.textContent = form.dataset.success || '';
+        form.querySelectorAll('.field').forEach((f) => {
+          if (f instanceof HTMLInputElement || f instanceof HTMLTextAreaElement) f.value = '';
+        });
+        button.remove();
+      } catch {
+        statusEl.className = 'status is-error';
+        statusEl.textContent = (form.dataset.error || '') + ' ';
+        const a = document.createElement('a');
+        a.href = fallback(data);
+        a.textContent = form.dataset.fallback || 'Email';
+        statusEl.appendChild(a);
+      } finally {
+        if (button.isConnected) {
+          button.disabled = false;
+          button.textContent = submitLabel;
+        }
+      }
+    });
+  }
+</script>
+
+<style>
+  .contact {
+    background: var(--color-bg-primary);
+    border-block-start: 1px solid var(--color-separator);
+  }
+
+  h2 {
+    margin: 0.75rem 0 0;
+  }
+
+  .intro {
+    margin-block: 1.25rem 0;
+  }
+
+  .cols {
+    margin-block-start: clamp(2.5rem, 5vw, 3.5rem);
+    display: grid;
+    gap: clamp(2.5rem, 5vw, 3.5rem);
+  }
+
+  .label {
+    margin: 0 0 1rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-label-2);
+  }
+
+  :global(html[lang='fa']) .label {
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .channels {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .channels a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 0.75rem;
+    margin-inline-start: -0.75rem;
+    border-radius: var(--radius-control);
+    text-decoration: none;
+    font-weight: 550;
+    transition: background-color 0.3s var(--ease-spring);
+    overflow-wrap: anywhere;
+  }
+
+  .channels a:hover {
+    background: var(--color-bg-secondary);
+  }
+
+  .ico {
+    color: var(--color-tint);
+    display: inline-flex;
+    flex: 0 0 auto;
+  }
+
+  .one-pager {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-block-start: 1.5rem;
+    color: var(--color-tint);
+    font-weight: 620;
+    text-decoration: none;
+  }
+
+  .one-pager:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  :global([dir='rtl']) .one-pager :global(svg) {
+    --dir-flip: -1;
+  }
+
+  .founder-line {
+    margin: 1.5rem 0 0;
+    color: var(--color-label-2);
+    font-size: 0.9375rem;
+  }
+
+  form {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .progress {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--color-label-2);
+  }
+
+  .dot {
+    inline-size: 22px;
+    block-size: 4px;
+    border-radius: 2px;
+    background: var(--color-separator);
+  }
+
+  .dot.on {
+    background: var(--color-tint);
+  }
+
+  .progress-text {
+    margin-inline-start: 0.5rem;
+  }
+
+  .row {
+    display: grid;
+    gap: 0.375rem;
+  }
+
+  label {
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
+
+  .hp {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .submit {
+    justify-self: start;
+  }
+
+  .consent,
+  .status {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--color-label-2);
+  }
+
+  .status:empty {
+    display: none;
+  }
+
+  .status.is-ok {
+    color: var(--color-tint);
+    font-weight: 600;
+  }
+
+  .status.is-error {
+    color: light-dark(#b3261e, #ff8a80);
+    font-weight: 600;
+  }
+
+  .status a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  @media (min-width: 64rem) {
+    .cols {
+      grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+      gap: 4rem;
+    }
+  }
+</style>

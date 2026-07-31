@@ -1,0 +1,169 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import type { Copy } from '../content/types';
+
+interface Props {
+  copy: Copy;
+  path: string;
+}
+const { copy: c, path } = Astro.props;
+const home = c.locale === 'fa' ? '/' : '/en/';
+---
+
+<BaseLayout copy={c} path={path} alternates={{ fa: '/one-pager/', en: '/en/one-pager/' }}>
+  <main class="sheet" id="main">
+    <div class="wrap">
+      <p class="back no-print"><a href={home}>{c.onePager.back}</a></p>
+
+      <header class="head">
+        <h1 class="h2">{c.onePager.title}</h1>
+        <p class="sub">{c.onePager.subtitle}</p>
+      </header>
+
+      <dl class="rows">
+        {c.onePager.sections.map((s) => (
+          <div class="row">
+            <dt class="h3">{s.title}</dt>
+            <dd>{s.body}</dd>
+          </div>
+        ))}
+      </dl>
+
+      <ul class="channels">
+        {[c.channels.telegram, c.channels.whatsapp, c.channels.phone, c.channels.email, c.channels.github].map((ch) => (
+          <li><a href={ch.href} rel={ch.href.startsWith('http') ? 'noopener' : undefined}>{ch.label}</a></li>
+        ))}
+      </ul>
+
+      <p class="disclaimer">
+        {c.locale === 'fa' ? c.footer.disclaimerFa : c.footer.disclaimerEn}
+      </p>
+      <p class="disclaimer alt" lang={c.locale === 'fa' ? 'en' : 'fa'} dir={c.locale === 'fa' ? 'ltr' : 'rtl'}>
+        {c.locale === 'fa' ? c.footer.disclaimerEn : c.footer.disclaimerFa}
+      </p>
+
+      <p class="no-print print-cta">
+        <button class="btn btn-primary" id="print-btn" type="button">{c.onePager.print}</button>
+      </p>
+    </div>
+  </main>
+</BaseLayout>
+
+<script>
+  document.getElementById('print-btn')?.addEventListener('click', () => window.print());
+</script>
+
+<style>
+  .sheet {
+    padding-block: clamp(2rem, 6vw, 4rem) clamp(3rem, 8vw, 5rem);
+    background: var(--color-bg-primary);
+    min-block-size: 100vh;
+  }
+
+  .back a {
+    color: var(--color-tint);
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .head {
+    margin-block-start: 1rem;
+    padding-block-end: 1.5rem;
+    border-block-end: 1px solid var(--color-separator);
+  }
+
+  .head h1 {
+    margin: 0;
+  }
+
+  .sub {
+    margin: 0.75rem 0 0;
+    color: var(--color-label-2);
+  }
+
+  .rows {
+    margin: 0;
+  }
+
+  .row {
+    padding-block: 1.5rem;
+    border-block-end: 1px solid var(--color-separator);
+  }
+
+  dt {
+    margin: 0 0 0.5rem;
+  }
+
+  dd {
+    margin: 0;
+    color: var(--color-label-2);
+    max-width: var(--measure);
+  }
+
+  .channels {
+    list-style: none;
+    margin: 1.5rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.5rem;
+  }
+
+  .channels a {
+    display: inline-flex;
+    align-items: center;
+    color: var(--color-tint);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+
+  .channels a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .disclaimer {
+    margin: 1.5rem 0 0;
+    font-size: 0.9375rem;
+    max-width: var(--measure);
+  }
+
+  .alt {
+    color: var(--color-label-2);
+    margin-block-start: 0.5rem;
+  }
+
+  .print-cta {
+    margin-block-start: 2rem;
+  }
+
+  @media (min-width: 48rem) {
+    .row {
+      display: grid;
+      grid-template-columns: minmax(12rem, 16rem) 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+  }
+
+  @media print {
+    .sheet {
+      padding: 0;
+      background: #fff;
+      min-block-size: 0;
+    }
+    .row {
+      break-inside: avoid;
+      padding-block: 0.75rem;
+    }
+    dd,
+    .sub,
+    .alt {
+      color: #444;
+    }
+  }
+</style>

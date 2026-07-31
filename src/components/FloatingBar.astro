@@ -1,0 +1,117 @@
+---
+import type { Copy } from '../content/types';
+import Icons from './Icons.astro';
+
+interface Props {
+  copy: Copy;
+}
+const { copy: c } = Astro.props;
+---
+
+<div class="bar-shell no-print" id="floating-bar" aria-hidden="true">
+  <nav class="bar glass" aria-label={c.floating.label}>
+    <a href={c.channels.telegram.href} rel="noopener" tabindex="-1">
+      <Icons name="telegram" size={20} /><span>{c.floating.telegram}</span>
+    </a>
+    <span class="sep" aria-hidden="true"></span>
+    <a href={c.channels.whatsapp.href} rel="noopener" tabindex="-1">
+      <Icons name="whatsapp" size={20} /><span>{c.floating.whatsapp}</span>
+    </a>
+    <span class="sep" aria-hidden="true"></span>
+    <a href={c.channels.phone.href} tabindex="-1">
+      <Icons name="phone" size={20} /><span>{c.floating.call}</span>
+    </a>
+  </nav>
+</div>
+
+<script>
+  // Appears after the first scroll, hides again at the top and while the
+  // contact section is on screen, so it never covers what it points at.
+  const shell = document.getElementById('floating-bar');
+  const contact = document.getElementById('contact');
+  if (shell) {
+    let atContact = false;
+    const setState = () => {
+      const show = window.scrollY > 400 && !atContact;
+      shell.classList.toggle('is-on', show);
+      shell.setAttribute('aria-hidden', show ? 'false' : 'true');
+      shell.querySelectorAll('a').forEach((a) => a.setAttribute('tabindex', show ? '0' : '-1'));
+    };
+    if (contact) {
+      new IntersectionObserver(
+        ([e]) => {
+          atContact = e.isIntersecting;
+          setState();
+        },
+        { rootMargin: '0px 0px -30% 0px' }
+      ).observe(contact);
+    }
+    addEventListener('scroll', setState, { passive: true });
+    setState();
+  }
+</script>
+
+<style>
+  .bar-shell {
+    position: fixed;
+    inset-block-end: calc(env(safe-area-inset-bottom, 0px) + 0.875rem);
+    inset-inline: 0;
+    z-index: 45;
+    display: flex;
+    justify-content: center;
+    padding-inline: 1rem;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(120%);
+    transition: opacity 0.35s var(--ease-spring), transform 0.35s var(--ease-spring);
+  }
+
+  .bar-shell.is-on {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    border-radius: 999px;
+    padding-inline: 0.375rem;
+    max-width: 100%;
+  }
+
+  .bar a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 48px;
+    min-width: 48px;
+    padding-inline: 0.875rem;
+    border-radius: 999px;
+    text-decoration: none;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-label-1);
+  }
+
+  .bar a:hover {
+    color: var(--color-tint);
+  }
+
+  .sep {
+    inline-size: 1px;
+    block-size: 22px;
+    background: var(--color-separator);
+    flex: 0 0 auto;
+  }
+
+  @media (max-width: 24rem) {
+    .bar a span {
+      display: none;
+    }
+    .bar a {
+      padding-inline: 0.75rem;
+    }
+  }
+</style>

@@ -1,0 +1,16 @@
+{
+  "name": "Zista Health",
+  "short_name": "Zista",
+  "description": "Zista Health is a remote patient monitoring platform. Pre-launch.",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#ffffff",
+  "theme_color": "#0071e3",
+  "lang": "fa-IR",
+  "dir": "rtl",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

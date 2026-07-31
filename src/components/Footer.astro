@@ -1,0 +1,100 @@
+---
+import type { Copy } from '../content/types';
+
+interface Props {
+  copy: Copy;
+}
+const { copy: c } = Astro.props;
+
+// The disclosure is required in both languages, whichever page you are on.
+const first = c.locale === 'fa' ? c.footer.disclaimerFa : c.footer.disclaimerEn;
+const second = c.locale === 'fa' ? c.footer.disclaimerEn : c.footer.disclaimerFa;
+const secondLang = c.locale === 'fa' ? 'en' : 'fa';
+const secondDir = c.locale === 'fa' ? 'ltr' : 'rtl';
+---
+
+<footer class="footer">
+  <div class="wrap">
+    <p class="disclaimer">{first}</p>
+    <p class="disclaimer alt" lang={secondLang} dir={secondDir}>{second}</p>
+
+    <hr class="rule" />
+
+    <ul class="links">
+      {c.footer.links.map((l) => (
+        <li><a href={l.href} rel={l.href.startsWith('http') ? 'noopener' : undefined}>{l.label}</a></li>
+      ))}
+    </ul>
+
+    <p class="note">{c.footer.nameNote}</p>
+    <p class="rights">{c.footer.rights}</p>
+  </div>
+  <div class="bar-space" aria-hidden="true"></div>
+</footer>
+
+<style>
+  .footer {
+    background: var(--color-bg-canvas);
+    border-block-start: 1px solid var(--color-separator);
+    padding-block: clamp(3rem, 6vw, 4.5rem) 1.5rem;
+  }
+
+  .disclaimer {
+    margin: 0;
+    max-width: var(--measure);
+    font-size: 0.9375rem;
+    color: var(--color-label-1);
+  }
+
+  .alt {
+    margin-block-start: 0.75rem;
+    color: var(--color-label-2);
+  }
+
+  .rule {
+    margin-block: 2rem;
+  }
+
+  .links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+  }
+
+  .links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* WCAG 2.2 target size: short words like «ایمیل» are narrower than 44px. */
+    min-width: 44px;
+    color: var(--color-tint);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    text-decoration: none;
+  }
+
+  .links a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .note,
+  .rights {
+    margin: 1.25rem 0 0;
+    font-size: 0.875rem;
+    color: var(--color-label-2);
+    max-width: var(--measure);
+  }
+
+  .rights {
+    margin-block-start: 0.5rem;
+  }
+
+  /* Keeps the floating bar from ever resting on top of the last line. */
+  .bar-space {
+    block-size: calc(env(safe-area-inset-bottom, 0px) + 4.5rem);
+  }
+</style>

@@ -1,0 +1,89 @@
+---
+import type { Copy } from '../content/types';
+import Icons from './Icons.astro';
+
+interface Props {
+  copy: Copy;
+}
+const { copy: c } = Astro.props;
+---
+
+<section class="section" id="paths" aria-labelledby="paths-h">
+  <div class="wrap">
+    <p class="eyebrow reveal">{c.paths.eyebrow}</p>
+    <h2 class="h2 measure reveal" id="paths-h">{c.paths.h2}</h2>
+    <p class="lead measure reveal intro">{c.paths.intro}</p>
+
+    <ul class="grid">
+      {c.paths.items.map((p, i) => (
+        <li class="card path reveal" style={`--d:${(i % 2) * 60}ms`}>
+          <h3 class="h3">{p.title}</h3>
+          <p class="body">{p.body}</p>
+          <a class="go" href={`#contact`} data-path={p.value}>
+            {p.cta}
+            <Icons name="arrow" size={18} />
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  h2 {
+    margin: 0.75rem 0 0;
+  }
+
+  .intro {
+    margin-block: 1.25rem 0;
+  }
+
+  .grid {
+    list-style: none;
+    margin: clamp(2.5rem, 5vw, 3.5rem) 0 0;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+  }
+
+  .path {
+    display: flex;
+    flex-direction: column;
+    transition-delay: var(--d, 0ms);
+  }
+
+  .path h3 {
+    margin: 0 0 0.625rem;
+  }
+
+  .body {
+    margin: 0 0 1.25rem;
+    color: var(--color-label-2);
+    flex: 1;
+  }
+
+  .go {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    align-self: flex-start;
+    color: var(--color-tint);
+    font-weight: 620;
+    text-decoration: none;
+  }
+
+  .go:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  :global([dir='rtl']) .go :global(svg) {
+    --dir-flip: -1;
+  }
+
+  @media (min-width: 48rem) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>

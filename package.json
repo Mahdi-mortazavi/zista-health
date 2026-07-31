@@ -1,0 +1,37 @@
+{
+  "name": "zista-health",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "node scripts/gen-assets.mjs && astro build && node scripts/subset-fonts.mjs",
+    "preview": "astro preview",
+    "assets": "node scripts/gen-assets.mjs",
+    "check": "astro check",
+    "cf:dev": "wrangler dev",
+    "deploy": "npm run build && wrangler deploy"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "private": "true",
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.3",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^5.18.2",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260731.1",
+    "@resvg/resvg-js": "^2.6.2",
+    "lighthouse": "^13.4.1",
+    "puppeteer-core": "^25.4.0",
+    "subset-font": "^2.5.0",
+    "wrangler": "^4.116.0"
+  },
+  "overrides": {
+    "vite": "^6.4.3"
+  }
+}

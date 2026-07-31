@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <style>
+    .r { stroke: #0071e3; fill: #0071e3; }
+    @media (prefers-color-scheme: dark) { .r { stroke: #0a84ff; fill: #0a84ff; } }
+  </style>
+  <circle class="r" cx="50" cy="50" r="34" fill="none" stroke-width="12" stroke-linecap="round" stroke-dasharray="162 214" transform="rotate(-52 50 50)"/>
+  <circle class="r" cx="50" cy="50" r="11" stroke="none"/>
+</svg>

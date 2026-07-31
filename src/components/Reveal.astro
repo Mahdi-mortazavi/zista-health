@@ -1,0 +1,25 @@
+---
+// Scroll entrance. Fires once per element, then stops observing.
+// Everything is already visible without JS, and the CSS disables it entirely
+// under prefers-reduced-motion.
+---
+
+<script>
+  const items = document.querySelectorAll('.reveal');
+  if (items.length && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add('is-in');
+            io.unobserve(e.target);
+          }
+        }
+      },
+      { rootMargin: '0px 0px -8% 0px', threshold: 0.05 }
+    );
+    items.forEach((el) => io.observe(el));
+  } else {
+    items.forEach((el) => el.classList.add('is-in'));
+  }
+</script>

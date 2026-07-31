@@ -1,0 +1,234 @@
+---
+import '../styles/tokens.css';
+import type { Copy } from '../content/types';
+
+interface Props {
+  copy: Copy;
+  /** Path of this page, e.g. "/" or "/en/". Used for canonical + hreflang. */
+  path: string;
+  /** Emit the FAQ / SoftwareApplication graph. Only the landing pages should. */
+  landing?: boolean;
+  noindex?: boolean;
+  /** hreflang targets for this page. Defaults to the two landing pages. */
+  alternates?: { fa: string; en: string };
+}
+
+const {
+  copy: c,
+  path,
+  landing = false,
+  noindex = false,
+  alternates = { fa: '/', en: '/en/' },
+} = Astro.props;
+const site = Astro.site!;
+
+const canonical = new URL(path, site).href;
+const faUrl = new URL(alternates.fa, site).href;
+const enUrl = new URL(alternates.en, site).href;
+const rootUrl = new URL('/', site).href;
+const ogImage = new URL(`/og-${c.locale}.png`, site).href;
+const logoUrl = new URL('/zista-mark.svg', site).href;
+
+const TELEGRAM = 'https://t.me/Mahdi_mortazavi1';
+const GITHUB = 'https://github.com/Mahdi-mortazavi';
+const EMAIL = 'mahdi.mortazavi.135@gmail.com';
+const TEL = '+98-992-927-1926';
+
+const person = {
+  '@type': 'Person',
+  '@id': `${rootUrl}#founder`,
+  name: 'Mahdi Mortazavi',
+  alternateName: 'مهدی مرتضوی',
+  jobTitle: 'Founder and Product Lead',
+  worksFor: { '@id': `${rootUrl}#org` },
+  sameAs: [GITHUB, TELEGRAM],
+};
+
+const organization = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  '@id': `${rootUrl}#org`,
+  name: 'Zista Health',
+  alternateName: ['زیستا', 'Zista', 'زیستا هلث'],
+  url: rootUrl,
+  logo: logoUrl,
+  description:
+    'Zista Health is a remote patient monitoring platform. A ring worn day and night measures physiological signals between appointments and surfaces changes to the patient, their physician and their family. Pre-launch; not a certified medical device.',
+  foundingDate: '2026',
+  founder: person,
+  sameAs: [GITHUB, TELEGRAM],
+  areaServed: { '@type': 'Country', name: 'Iran' },
+  knowsLanguage: ['fa', 'en'],
+  contactPoint: [
+    {
+      '@type': 'ContactPoint',
+      contactType: 'sales',
+      email: EMAIL,
+      telephone: TEL,
+      availableLanguage: ['fa', 'en'],
+      url: TELEGRAM,
+    },
+  ],
+};
+
+const website = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  '@id': `${rootUrl}#website`,
+  url: rootUrl,
+  name: 'Zista Health',
+  alternateName: 'زیستا',
+  inLanguage: ['fa-IR', 'en'],
+  publisher: { '@id': `${rootUrl}#org` },
+};
+
+const personGraph = { '@context': 'https://schema.org', ...person };
+
+const softwareApplication = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  '@id': `${rootUrl}#app`,
+  name: 'Zista',
+  alternateName: 'زیستا',
+  applicationCategory: 'HealthApplication',
+  applicationSubCategory: 'Remote patient monitoring',
+  operatingSystem: 'Android, iOS',
+  inLanguage: ['fa-IR', 'en'],
+  url: rootUrl,
+  author: { '@id': `${rootUrl}#founder` },
+  publisher: { '@id': `${rootUrl}#org` },
+  description:
+    'Zista is a remote patient monitoring platform. A ring measures heart rate, heart rate variability, blood oxygen, respiration, skin temperature, sleep and movement continuously, and surfaces trends to the patient, their physician and a chosen family member. Zista does not diagnose disease and is not a certified medical device. Pre-launch.',
+  softwareVersion: 'pre-launch',
+  releaseNotes: 'Pre-launch. Hardware under evaluation; nothing is for sale.',
+};
+
+const faqPage = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  '@id': `${canonical}#faq`,
+  inLanguage: c.htmlLang,
+  mainEntity: c.faq.items.map((item) => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: { '@type': 'Answer', text: item.a },
+  })),
+};
+
+// One face per page. The other is only fetched if a glyph is missing, which
+// on these pages means the footer's second-language disclosure.
+const preloads = c.locale === 'fa' ? ['/fonts/vazirmatn.woff2'] : ['/fonts/inter.woff2'];
+
+const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN ?? '';
+---
+
+<!doctype html>
+<html lang={c.htmlLang} dir={c.dir}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <title>{c.meta.title}</title>
+    <meta name="description" content={c.meta.description} />
+    {
+      noindex ? (
+        <meta name="robots" content="noindex,follow" />
+      ) : (
+        <meta
+          name="robots"
+          content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1"
+        />
+      )
+    }
+
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="fa" href={faUrl} />
+    <link rel="alternate" hreflang="en" href={enUrl} />
+    <link rel="alternate" hreflang="x-default" href={faUrl} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Zista Health" />
+    <meta property="og:locale" content={c.ogLocale} />
+    <meta property="og:locale:alternate" content={c.locale === 'fa' ? 'en_US' : 'fa_IR'} />
+    <meta property="og:title" content={c.meta.title} />
+    <meta property="og:description" content={c.meta.description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={c.meta.ogAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={c.meta.title} />
+    <meta name="twitter:description" content={c.meta.description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={c.meta.ogAlt} />
+
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="author" content="Mahdi Mortazavi" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    {
+      preloads.map((href) => (
+        <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />
+      ))
+    }
+
+    <script is:inline>
+      document.documentElement.classList.add('js');
+    </script>
+
+    <script type="application/ld+json" set:html={JSON.stringify(organization)} />
+    <script type="application/ld+json" set:html={JSON.stringify(website)} />
+    <script type="application/ld+json" set:html={JSON.stringify(personGraph)} />
+    {landing && <script type="application/ld+json" set:html={JSON.stringify(softwareApplication)} />}
+    {landing && <script type="application/ld+json" set:html={JSON.stringify(faqPage)} />}
+  </head>
+
+  <body>
+    <a class="skip" href="#main">{c.nav.skipToContent}</a>
+    <slot />
+
+    {
+      analyticsToken && (
+        <script
+          is:inline
+          define:vars={{ analyticsToken }}
+          data-desc="Cloudflare Web Analytics, loaded after the page is idle so it never touches first paint. No cookies."
+        >
+          addEventListener('load', () => {
+            const s = document.createElement('script');
+            s.defer = true;
+            s.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+            s.setAttribute('data-cf-beacon', JSON.stringify({ token: analyticsToken }));
+            document.head.appendChild(s);
+          });
+        </script>
+      )
+    }
+  </body>
+</html>
+
+<style>
+  .skip {
+    position: fixed;
+    inset-block-start: 0.5rem;
+    inset-inline-start: 0.5rem;
+    z-index: 100;
+    padding: 0.75rem 1rem;
+    background: var(--color-bg-primary);
+    color: var(--color-tint);
+    border: 1px solid var(--color-separator);
+    border-radius: var(--radius-control);
+    font-weight: 600;
+    text-decoration: none;
+    transform: translateY(-200%);
+  }
+  .skip:focus {
+    transform: none;
+  }
+</style>

@@ -1,0 +1,90 @@
+---
+import type { Copy } from '../content/types';
+
+interface Props {
+  copy: Copy;
+}
+const { copy: c } = Astro.props;
+---
+
+<section class="section" id="people" aria-labelledby="people-h">
+  <div class="wrap">
+    <p class="eyebrow reveal">{c.personas.eyebrow}</p>
+    <h2 class="h2 measure reveal" id="people-h">{c.personas.h2}</h2>
+    <p class="lead measure reveal intro">{c.personas.intro}</p>
+
+    <ul class="grid">
+      {c.personas.items.map((p, i) => (
+        <li class={`card reveal${p.id === 'family' ? ' is-focus' : ''}`} style={`--d:${i * 60}ms`}>
+          <p class="role">{p.role}</p>
+          <p class="quote">{p.quote}</p>
+          <p class="body">{p.body}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  h2 {
+    margin: 0.75rem 0 0;
+  }
+
+  .intro {
+    margin-block: 1.25rem 0;
+  }
+
+  .grid {
+    list-style: none;
+    margin: clamp(2.5rem, 5vw, 3.5rem) 0 0;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+  }
+
+  li {
+    transition-delay: var(--d, 0ms);
+  }
+
+  .is-focus {
+    border-color: color-mix(in srgb, var(--color-tint) 40%, var(--color-separator));
+  }
+
+  .role {
+    margin: 0 0 0.875rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-label-2);
+  }
+
+  :global(html[lang='fa']) .role {
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .quote {
+    margin: 0 0 1rem;
+    font-size: 1.1875rem;
+    line-height: 1.4;
+    letter-spacing: -0.014em;
+    font-weight: 620;
+  }
+
+  :global(html[lang='fa']) .quote {
+    line-height: 1.75;
+    letter-spacing: 0;
+  }
+
+  .body {
+    margin: 0;
+    color: var(--color-label-2);
+  }
+
+  @media (min-width: 62rem) {
+    .grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>

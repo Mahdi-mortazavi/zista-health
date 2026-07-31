@@ -1,0 +1,110 @@
+---
+import type { Copy } from '../content/types';
+
+interface Props {
+  copy: Copy;
+}
+const { copy: c } = Astro.props;
+---
+
+<section class="section" id="signals" aria-labelledby="signals-h">
+  <div class="wrap">
+    <p class="eyebrow reveal">{c.signals.eyebrow}</p>
+    <h2 class="h2 measure reveal" id="signals-h">{c.signals.h2}</h2>
+    <p class="lead measure reveal intro">{c.signals.intro}</p>
+
+    <ul class="grid">
+      {c.signals.items.map((s, i) => (
+        <li class="signal reveal" style={`--d:${(i % 3) * 50}ms`}>
+          <h3 class="h3">{s.name}</h3>
+          <p class="body">{s.body}</p>
+          <p class={`tag tag-${s.status}`}>{c.signals.statusLabels[s.status]}</p>
+        </li>
+      ))}
+    </ul>
+
+    <p class="note reveal">{c.signals.note}</p>
+  </div>
+</section>
+
+<style>
+  h2 {
+    margin: 0.75rem 0 0;
+  }
+
+  .intro {
+    margin-block: 1.25rem 0;
+  }
+
+  .grid {
+    list-style: none;
+    margin: clamp(2.5rem, 5vw, 3.5rem) 0 0;
+    padding: 0;
+    display: grid;
+    gap: 0;
+    border-block-start: 1px solid var(--color-separator);
+  }
+
+  .signal {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-block: 1.5rem;
+    border-block-end: 1px solid var(--color-separator);
+    transition-delay: var(--d, 0ms);
+  }
+
+  .signal h3 {
+    margin: 0 0 0.375rem;
+  }
+
+  .body {
+    margin: 0 0 0.75rem;
+    color: var(--color-label-2);
+    max-width: 46ch;
+    flex: 1;
+  }
+
+  .tag {
+    margin: 0;
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    color: var(--color-label-2);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-separator);
+  }
+
+  :global(html[lang='fa']) .tag {
+    letter-spacing: 0;
+  }
+
+  .tag-planned {
+    color: var(--color-tint);
+    border-color: color-mix(in srgb, var(--color-tint) 35%, var(--color-separator));
+    background: color-mix(in srgb, var(--color-tint) 8%, transparent);
+  }
+
+  .note {
+    margin: 2rem 0 0;
+    color: var(--color-label-2);
+    font-size: 0.9375rem;
+    max-width: var(--measure);
+  }
+
+  @media (min-width: 48rem) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+      column-gap: 2.5rem;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+</style>
