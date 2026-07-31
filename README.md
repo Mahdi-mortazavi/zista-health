@@ -284,21 +284,29 @@ Measured on this build, Lighthouse mobile, all four pages:
 | `/one-pager/` | 100 | 100 | 100 | 100 |
 | `/en/one-pager/` | 100 | 100 | 100 | 100 |
 
-Three Lighthouse CI runs per locale against a real `wrangler dev`, mobile
-emulation, Slow 4G, 4× CPU slowdown:
+Measured against the deployed site on Cloudflare's edge, mobile emulation:
 
 | | Persian `/` | English `/en/` |
 |---|---|---|
-| LCP | 1.66 s | 1.51 s |
-| CLS | 0.0006 | 0.0000 |
-| Total transfer | 106 KB | 104 KB |
-| First-view (HTML brotli + preloaded font) | 62 KB | 54 KB |
+| Performance | 100 | 100 |
+| Accessibility | 100 | 100 |
+| Best practices | 100 | 100 |
+| SEO | 100 | 100 |
+| LCP | 1.20 s | 1.37 s |
+| CLS | 0.0030 | 0.0005 |
+| Total transfer | 107 KB | 105 KB |
 | Client JS | 3.3 KB | 3.3 KB |
 
-The Persian page is ~160 ms over the 1.5 s LCP stretch target in the lab, which
-is the cost of the Arabic face being 7 KB larger than the Latin one plus a local
-`workerd` time-to-first-byte that the real edge will beat. Both pages score a
-full 100 on performance.
+Against a local `wrangler dev` the same pages score 100 but LCP reads ~1.7 s;
+the gap is local `workerd` time-to-first-byte, not the site. Trust the edge
+numbers.
+
+The contact path was verified end to end on the live site by sending two marker
+messages straight to the Telegram API and one submission through the form
+between them. The form's message landed between the markers, which is the only
+way to prove delivery from outside the recipient's phone: `POST /api/contact`
+returns 200 whether or not Telegram accepted the message, because delivery runs
+in `ctx.waitUntil` after the response.
 
 All five JSON-LD blocks validate at `validator.schema.org` with zero errors and
 zero warnings, on both locales.
