@@ -13,3 +13,4 @@ shots/
 .DS_Store
 Thumbs.db
 .lighthouseci/
+.cf-token
