@@ -5,8 +5,9 @@ interface Props {
 const { label } = Astro.props;
 
 // A photoplethysmogram-shaped beat: sharp systolic upstroke, fall, dicrotic
-// notch, slow diastolic decay. Four beats are drawn; the element translates by
-// exactly two of them, so the loop has no seam.
+// notch, slow diastolic decay. Eight beats are drawn, four are visible, and the
+// element translates by exactly four, so the loop has no seam. Four across the
+// viewport keeps the pulse legible at 390px and at 1440px alike.
 const W = 200;
 const beat = (x: number) =>
   `C${x + 10},100 ${x + 14},100 ${x + 20},98 ` +
@@ -17,11 +18,11 @@ const beat = (x: number) =>
   `C${x + 126},84 ${x + 140},96 ${x + 160},99 ` +
   `C${x + 176},101 ${x + 190},100 ${x + W},100`;
 
-const d = `M0,100 ${[0, W, W * 2, W * 3].map(beat).join(' ')}`;
+const d = `M0,100 ${Array.from({ length: 8 }, (_, i) => beat(i * W)).join(' ')}`;
 ---
 
 <div class="wave" role="img" aria-label={label}>
-  <svg viewBox="0 0 400 200" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+  <svg viewBox="0 0 800 200" preserveAspectRatio="none" aria-hidden="true" focusable="false">
     <defs>
       <linearGradient id="fade" x1="0" y1="0" x2="1" y2="0">
         <stop offset="0" stop-color="#fff" stop-opacity="0" />
@@ -30,7 +31,7 @@ const d = `M0,100 ${[0, W, W * 2, W * 3].map(beat).join(' ')}`;
         <stop offset="1" stop-color="#fff" stop-opacity="0" />
       </linearGradient>
       <mask id="fademask">
-        <rect x="0" y="0" width="400" height="200" fill="url(#fade)" />
+        <rect x="0" y="0" width="800" height="200" fill="url(#fade)" />
       </mask>
     </defs>
     <g mask="url(#fademask)">
@@ -43,7 +44,7 @@ const d = `M0,100 ${[0, W, W * 2, W * 3].map(beat).join(' ')}`;
 <style>
   .wave {
     inline-size: 100%;
-    aspect-ratio: 1000 / 260;
+    aspect-ratio: 1000 / 250;
     max-block-size: 220px;
     overflow: hidden;
     contain: paint;
@@ -62,7 +63,7 @@ const d = `M0,100 ${[0, W, W * 2, W * 3].map(beat).join(' ')}`;
     stroke-linecap: round;
     stroke-linejoin: round;
     vector-effect: non-scaling-stroke;
-    animation: drift 2.4s linear infinite;
+    animation: drift 4.8s linear infinite;
   }
 
   .ghost {
@@ -77,14 +78,14 @@ const d = `M0,100 ${[0, W, W * 2, W * 3].map(beat).join(' ')}`;
       transform: translateX(0);
     }
     to {
-      transform: translateX(-400px);
+      transform: translateX(-800px);
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .trace {
       animation: none;
-      transform: translateX(-100px);
+      transform: translateX(-260px);
     }
   }
 </style>

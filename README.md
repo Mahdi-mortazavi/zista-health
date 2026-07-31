@@ -272,8 +272,24 @@ Measured on this build, Lighthouse mobile, all four pages:
 | `/one-pager/` | 100 | 100 | 100 | 100 |
 | `/en/one-pager/` | 100 | 100 | 100 | 100 |
 
-First-view transfer: 62 KB Persian, 54 KB English. CLS 0.0005. All five JSON-LD
-blocks validate at `validator.schema.org` with zero errors and zero warnings.
+Three Lighthouse CI runs per locale against a real `wrangler dev`, mobile
+emulation, Slow 4G, 4× CPU slowdown:
+
+| | Persian `/` | English `/en/` |
+|---|---|---|
+| LCP | 1.66 s | 1.51 s |
+| CLS | 0.0006 | 0.0000 |
+| Total transfer | 106 KB | 104 KB |
+| First-view (HTML brotli + preloaded font) | 62 KB | 54 KB |
+| Client JS | 3.3 KB | 3.3 KB |
+
+The Persian page is ~160 ms over the 1.5 s LCP stretch target in the lab, which
+is the cost of the Arabic face being 7 KB larger than the Latin one plus a local
+`workerd` time-to-first-byte that the real edge will beat. Both pages score a
+full 100 on performance.
+
+All five JSON-LD blocks validate at `validator.schema.org` with zero errors and
+zero warnings, on both locales.
 
 ---
 
