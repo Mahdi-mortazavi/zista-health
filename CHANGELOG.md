@@ -114,7 +114,18 @@ Three fixes, in order of what they actually returned:
 | `will-change` scoped to an active drag | Three permanently composited layers held for the whole session | one less GPU cost |
 | Inactive phone panes get `content-visibility: hidden` | Six of the nine mock screens are never visible at once, but were being laid out anyway | ~40ms on the Persian page |
 
-Final, five clean runs on the Persian page: **100, 100, 100, 100, 100**.
+Then one more, found only on the deployed site: **Speed Index 4,060ms against an
+LCP of 1,486ms**. The gap was the hero pulse. An animation that never stops means
+the filmstrip never reaches visually complete, so the metric keeps counting long
+after the page is usable.
+
+Stopping the pulse permanently fixed it and was the wrong fix — a halted
+heartbeat is not an image a patient-monitoring company should ship. It now holds
+still until load finishes and while the hero is off screen, then runs as before.
+SI 4,060ms → 1,788ms, and it no longer burns the compositor on a phone for a
+decoration nobody is looking at.
+
+Final, five clean runs on the Persian page locally: **100, 100, 100, 100, 100**.
 
 ### Contrast regression found and fixed
 
@@ -127,12 +138,15 @@ surfaces, exactly the way iOS varies systemBlue. Accessibility back to 100.
 
 ## Verified
 
+Measured on the deployed site, median of three runs each:
+
 | | Persian `/` | English `/en/` |
 |---|---|---|
 | Lighthouse mobile | 100 / 100 / 100 / 100 | 100 / 100 / 100 / 100 |
-| LCP | 1.51 s | 1.51 s |
-| CLS | 0.0007 | 0.0000 |
-| Total transfer | 115 KB | 112 KB |
+| LCP | 1.19 s | 1.53 s |
+| Speed Index | 1.79 s | 2.63 s |
+| CLS | 0.0034 | 0.0000 |
+| Total transfer | 116 KB | 113 KB |
 | Client JS | 7.0 KB inline, no bundle | same |
 | Composited glass layers | 3 | 3 |
 
