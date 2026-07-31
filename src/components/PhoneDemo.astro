@@ -1,0 +1,522 @@
+---
+import type { Copy, PhoneScreen } from '../content/types';
+
+interface Props {
+  copy: Copy;
+}
+const { copy: c } = Astro.props;
+
+/** Sparkline path for a 0–1 series, drawn in a 100×36 box. */
+function spark(series: number[]): string {
+  const w = 100;
+  const h = 36;
+  const step = w / (series.length - 1);
+  return series
+    .map((v, i) => `${i === 0 ? 'M' : 'L'}${(i * step).toFixed(1)},${(h - v * h).toFixed(1)}`)
+    .join(' ');
+}
+
+const roles = c.journey.roles;
+---
+
+<div class="demo">
+  <div class="phone-wrap">
+    <!-- The device. Bezel radius and screen radius are concentric:
+         screen = phone − bezel. -->
+    <div class="phone" role="group" aria-roledescription={c.journey.screenLabel}>
+      <div class="island" aria-hidden="true"></div>
+      <div class="screen">
+        {
+          roles.map((role, ri) => (
+            <div class="role-pane" data-role={role.value} data-active={ri === 0 ? 'true' : 'false'}>
+              <div class="track" data-track>
+                {role.screens.map((s: PhoneScreen, si) => (
+                  <article
+                    class="app"
+                    data-screen={si}
+                    aria-label={`${c.journey.screenLabel} ${si + 1}: ${s.tab}`}
+                  >
+                    <header class="app-bar">
+                      <span class="app-time tabular" aria-hidden="true">۹:۴۱</span>
+                      <span class="app-title">{s.title}</span>
+                      <span class="app-batt" aria-hidden="true"></span>
+                    </header>
+
+                    <div class="app-body">
+                      <p class="app-primary">{s.primary}</p>
+                      <p class="app-secondary">{s.secondary}</p>
+
+                      {s.series && (
+                        <svg class="spark" viewBox="0 0 100 36" preserveAspectRatio="none" aria-hidden="true">
+                          <path class="spark-line" d={spark(s.series)} />
+                          <path class="spark-fill" d={`${spark(s.series)} L100,36 L0,36 Z`} />
+                        </svg>
+                      )}
+
+                      {s.rows && (
+                        <ul class="app-rows">
+                          {s.rows.map((r) => (
+                            <li>
+                              <span class={`dot dot-${r.state ?? 'ok'}`} aria-hidden="true"></span>
+                              <span class="r-label">{r.label}</span>
+                              <span class="r-value tabular">{r.value}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+
+                      {s.note && <p class="app-note">{s.note}</p>}
+                      {s.cta && <p class="app-cta" aria-hidden="true">{s.cta}</p>}
+                    </div>
+
+                    <nav class="app-tabs" aria-hidden="true">
+                      {role.screens.map((t, ti) => (
+                        <span class={ti === si ? 'is-on' : ''}>{t.tab}</span>
+                      ))}
+                    </nav>
+                  </article>
+                ))}
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    <p class="hint" data-hint>{c.journey.hint}</p>
+
+    <!-- Screen picker. Explicit, labelled, and the only way this advances:
+         nothing here plays on its own. -->
+    <div class="dots" role="tablist" aria-label={c.journey.screenLabel}>
+      {
+        roles[0]!.screens.map((s, i) => (
+          <button
+            type="button"
+            role="tab"
+            class="dot-btn"
+            data-dot={i}
+            aria-selected={i === 0 ? 'true' : 'false'}
+          >
+            <span class="dot-pill" aria-hidden="true"></span>
+            <span class="dot-name" data-dot-name={i}>{s.tab}</span>
+          </button>
+        ))
+      }
+    </div>
+  </div>
+
+  <p class="badge">
+    <span class="badge-dot" aria-hidden="true"></span>
+    {c.journey.previewBadge}
+  </p>
+</div>
+
+<style>
+  .demo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .phone-wrap {
+    width: 100%;
+    max-width: 19rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.875rem;
+  }
+
+  /* ── Device ────────────────────────────────────────────────── */
+  .phone {
+    --bezel: 10px;
+    position: relative;
+    width: 100%;
+    aspect-ratio: 9 / 19.3;
+    padding: var(--bezel);
+    border-radius: var(--radius-phone);
+    background: light-dark(
+      linear-gradient(160deg, #d8d8dd, #f3f3f6 30%, #c9c9d0),
+      linear-gradient(160deg, #3a3a3e, #17171a 30%, #303035)
+    );
+    box-shadow:
+      inset 0 0 0 1px light-dark(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.08)),
+      var(--shadow-raised);
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .island {
+    position: absolute;
+    inset-block-start: calc(var(--bezel) + 7px);
+    inset-inline: 0;
+    margin-inline: auto;
+    width: 28%;
+    height: 20px;
+    border-radius: 999px;
+    background: #000;
+    z-index: 3;
+  }
+
+  .screen {
+    position: relative;
+    height: 100%;
+    /* Concentricity: nested radius = parent radius − padding. */
+    border-radius: calc(var(--radius-phone) - var(--bezel));
+    overflow: hidden;
+    background: var(--color-bg-canvas);
+  }
+
+  .role-pane {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--dur-standard) var(--ease-out),
+      visibility 0s linear var(--dur-standard);
+  }
+
+  .role-pane[data-active='true'] {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
+  }
+
+  /* Six of the nine mock screens are never on screen at once. Laying them out
+     anyway costs real time in Persian, where shaping is far more expensive than
+     in Latin — this was worth ~40ms of blocking time on the Persian page.
+     The markup stays in the DOM, so crawlers still read every screen. */
+  .role-pane:not([data-active='true']) {
+    content-visibility: hidden;
+  }
+
+  /* The track stays logically left-to-right in both locales so the transform
+     maths is identical; each screen restores the reading direction. */
+  .track {
+    display: flex;
+    height: 100%;
+    direction: ltr;
+  }
+
+  .phone[data-dragging='true'] .track {
+    will-change: transform;
+  }
+
+  .app {
+    flex: 0 0 100%;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    direction: ltr;
+  }
+
+  :global(html[lang='fa']) .app {
+    direction: rtl;
+  }
+
+  /* ── In-app chrome. Deliberately NOT backdrop-filter: the backdrop here is
+     our own mock content, so a real blur buys no legibility and would spend
+     two of the page's four glass layers. The specular edge and fill are kept
+     so it still reads as the same material family. ── */
+  .app-bar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 0.875rem 0.5rem;
+    background: light-dark(rgba(255, 255, 255, 0.86), rgba(30, 30, 32, 0.86));
+    box-shadow:
+      inset 0 1px 0 var(--glass-specular),
+      0 1px 0 var(--color-separator);
+    flex: 0 0 auto;
+  }
+
+  .app-time {
+    font-size: 0.625rem;
+    font-weight: 640;
+    color: var(--color-label-2);
+  }
+
+  .app-title {
+    font-size: 0.8125rem;
+    font-weight: 660;
+    letter-spacing: -0.01em;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  :global(html[lang='fa']) .app-title {
+    letter-spacing: 0;
+  }
+
+  .app-batt {
+    justify-self: end;
+    width: 18px;
+    height: 9px;
+    border-radius: 2.5px;
+    border: 1px solid var(--color-label-3);
+    background: linear-gradient(
+      to var(--batt-dir, right),
+      var(--color-label-2) 72%,
+      transparent 72%
+    );
+  }
+
+  :global([dir='rtl']) .app-batt {
+    --batt-dir: left;
+  }
+
+  .app-body {
+    flex: 1;
+    padding: 1rem 0.875rem 0.875rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    overflow: hidden;
+  }
+
+  .app-primary {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 660;
+    line-height: 1.3;
+    letter-spacing: -0.012em;
+  }
+
+  :global(html[lang='fa']) .app-primary {
+    letter-spacing: 0;
+    line-height: 1.6;
+  }
+
+  .app-secondary {
+    margin: -0.375rem 0 0;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--color-label-2);
+  }
+
+  :global(html[lang='fa']) .app-secondary {
+    line-height: 1.7;
+  }
+
+  .spark {
+    width: 100%;
+    height: 68px;
+    margin-block: 0.125rem;
+    overflow: visible;
+  }
+
+  .spark-line {
+    fill: none;
+    stroke: var(--color-tint);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .spark-fill {
+    fill: color-mix(in srgb, var(--color-tint) 12%, transparent);
+    stroke: none;
+  }
+
+  .app-rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1px;
+    background: var(--color-separator);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .app-rows li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6875rem 0.75rem;
+    background: var(--color-bg-primary);
+    font-size: 0.75rem;
+    min-height: 0;
+  }
+
+  .dot {
+    inline-size: 6px;
+    block-size: 6px;
+    border-radius: 999px;
+    flex: 0 0 auto;
+    background: var(--color-label-3);
+  }
+
+  .dot-watch {
+    background: var(--color-tint);
+  }
+
+  .r-label {
+    color: var(--color-label-2);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .r-value {
+    margin-inline-start: auto;
+    font-weight: 620;
+    white-space: nowrap;
+  }
+
+  .app-note {
+    margin: auto 0 0;
+    font-size: 0.6875rem;
+    line-height: 1.45;
+    color: var(--color-label-3);
+  }
+
+  :global(html[lang='fa']) .app-note {
+    line-height: 1.75;
+  }
+
+  .app-cta {
+    margin: 0;
+    text-align: center;
+    padding: 0.5rem;
+    border-radius: 999px;
+    background: var(--color-tint-solid);
+    color: #fff;
+    font-size: 0.6875rem;
+    font-weight: 620;
+  }
+
+  .app-tabs {
+    flex: 0 0 auto;
+    display: flex;
+    padding: 0.4375rem 0.5rem calc(0.4375rem + 6px);
+    gap: 0.25rem;
+    background: light-dark(rgba(255, 255, 255, 0.86), rgba(30, 30, 32, 0.86));
+    box-shadow:
+      inset 0 1px 0 var(--glass-specular),
+      0 -1px 0 var(--color-separator);
+    position: relative;
+  }
+
+  .app-tabs::after {
+    content: '';
+    position: absolute;
+    inset-block-end: 5px;
+    inset-inline: 0;
+    margin-inline: auto;
+    width: 34%;
+    height: 3px;
+    border-radius: 999px;
+    background: var(--color-label-3);
+  }
+
+  .app-tabs span {
+    flex: 1;
+    text-align: center;
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: var(--color-label-3);
+    padding-block: 0.25rem;
+    border-radius: 999px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .app-tabs span.is-on {
+    color: var(--color-tint-on-fill);
+    background: color-mix(in srgb, var(--color-tint) 10%, transparent);
+  }
+
+  /* ── Picker ────────────────────────────────────────────────── */
+  .hint {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--color-label-3);
+    transition: opacity var(--dur-standard) var(--ease-out);
+  }
+
+  .hint[data-hidden='true'] {
+    opacity: 0;
+  }
+
+  .dots {
+    display: flex;
+    gap: 0.375rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .dot-btn {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 44px;
+    padding: 0.25rem 0.625rem;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    color: var(--color-label-3);
+    font-size: 0.75rem;
+    font-weight: 560;
+    border-radius: var(--radius-control);
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .dot-btn[aria-selected='true'] {
+    color: var(--color-label-1);
+  }
+
+  .dot-pill {
+    inline-size: 24px;
+    block-size: 4px;
+    border-radius: 999px;
+    background: var(--color-label-4);
+    transition:
+      background-color var(--dur-standard) var(--ease-out),
+      inline-size var(--dur-standard) var(--ease-spring);
+  }
+
+  .dot-btn[aria-selected='true'] .dot-pill {
+    background: var(--color-tint);
+    inline-size: 34px;
+  }
+
+  /* ── Honesty label. Not decoration — it is the reason this mock is
+     allowed to look this finished. ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0.4375rem 0.875rem;
+    border-radius: 999px;
+    background: var(--color-fill-1);
+    color: var(--color-label-2);
+    font-size: 0.75rem;
+    font-weight: 560;
+    text-align: center;
+  }
+
+  .badge-dot {
+    inline-size: 6px;
+    block-size: 6px;
+    border-radius: 999px;
+    background: var(--color-tint);
+    flex: 0 0 auto;
+  }
+
+  @media (min-width: 64rem) {
+    .phone-wrap {
+      max-width: 20.5rem;
+    }
+  }
+</style>

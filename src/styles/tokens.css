@@ -24,26 +24,45 @@
 }
 
 /* ─────────────────────────────────────────────────────────────
-   Design tokens — same family as the Zista document design system.
+   Design tokens. Every value a component uses traces back to here.
    ───────────────────────────────────────────────────────────── */
 @theme {
+  /* Labels — four opacity levels, iOS semantics */
   --color-label-1: light-dark(#1d1d1f, rgba(255, 255, 255, 0.96));
-  --color-label-2: light-dark(#6e6e73, rgba(235, 235, 245, 0.62));
+  --color-label-2: light-dark(#5d5d63, rgba(235, 235, 245, 0.68));
   --color-label-3: light-dark(#86868b, rgba(235, 235, 245, 0.4));
+  --color-label-4: light-dark(rgba(60, 60, 67, 0.18), rgba(235, 235, 245, 0.16));
+
+  /* Surfaces */
   --color-bg-primary: light-dark(#ffffff, #000000);
   --color-bg-canvas: light-dark(#fbfbfd, #0a0a0b);
   --color-bg-secondary: light-dark(#f5f5f7, #1c1c1e);
+  --color-bg-tertiary: light-dark(#ededf0, #2c2c2e);
+
+  /* Fills — four levels, for non-glass control backgrounds */
+  --color-fill-1: light-dark(rgba(120, 120, 128, 0.12), rgba(120, 120, 128, 0.24));
+  --color-fill-2: light-dark(rgba(120, 120, 128, 0.16), rgba(120, 120, 128, 0.32));
+
   --color-separator: light-dark(rgba(60, 60, 67, 0.16), rgba(84, 84, 88, 0.5));
+  --color-separator-strong: light-dark(rgba(60, 60, 67, 0.42), rgba(190, 190, 195, 0.6));
+
+  /* ONE accent. Interactive elements only, never decoration. */
   --color-tint: light-dark(#0071e3, #0a84ff);
-  /* Same accent, one step darker in dark mode, used only where white text sits
-     on top of it. #0a84ff behind white is 3.6:1 and fails WCAG AA. */
+  /* Same accent one step darker, used only where white text sits on top of it.
+     #0a84ff behind white is 3.6:1 and fails WCAG AA. */
   --color-tint-solid: light-dark(#0071e3, #0a68d8);
+  /* The accent again, adjusted for text sitting on a raised fill rather than
+     on the page. A fill lightens the backdrop in dark mode and darkens it in
+     light, so the plain tint drops under 4.5:1 in both. iOS varies systemBlue
+     the same way for elevated surfaces. */
+  --color-tint-on-fill: light-dark(#0064c8, #4aa8ff);
 
-  --radius-control: 10px;
-  --radius-card: 18px;
-  --radius-glass: 22px;
-
-  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+  /* Shape — continuous-feel corners, concentric through the hierarchy */
+  --radius-control: 12px;
+  --radius-card: 20px;
+  --radius-glass: 24px;
+  --radius-sheet: 32px;
+  --radius-phone: 44px;
 
   --font-sans: "Inter", "Vazirmatn", ui-sans-serif, system-ui, -apple-system,
     sans-serif;
@@ -57,19 +76,50 @@
 
 :root {
   color-scheme: light dark;
-  /* Kept for design-system parity. Decorative only — never used for text,
-     because it does not clear 4.5:1 on the light background. */
-  --color-label-3: light-dark(#86868b, rgba(235, 235, 245, 0.4));
-  --glass-bg: light-dark(rgba(255, 255, 255, 0.72), rgba(28, 28, 30, 0.68));
-  --glass-blur: saturate(180%) blur(20px);
+
+  /* ── Liquid Glass, 2026 revision ────────────────────────────
+     Back to front: diffused backdrop, fill, darkened edge, specular
+     highlight, size-scaled shadow. Regular is the default; Large is for
+     sheets and wide chrome, which read as thicker material. */
+  --glass-fill: light-dark(rgba(255, 255, 255, 0.62), rgba(28, 28, 30, 0.6));
+  --glass-fill-large: light-dark(rgba(255, 255, 255, 0.72), rgba(22, 22, 24, 0.7));
+  --glass-blur: 24px;
+  --glass-blur-large: 36px;
+  --glass-saturate: 180%;
+  --glass-specular: light-dark(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.16));
+  --glass-edge: light-dark(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.45));
+  --glass-shadow: 0 6px 24px light-dark(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.55));
+  --glass-shadow-large: 0 16px 48px
+    light-dark(rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0.65));
+
   --shadow-card: 0 1px 2px light-dark(rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.5)),
-    0 8px 24px light-dark(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.45));
-  --shadow-glass: 0 8px 32px light-dark(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.6));
-  --measure: 66ch;
+    0 10px 30px light-dark(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.45));
+  --shadow-raised: 0 2px 6px light-dark(rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.55)),
+    0 24px 60px light-dark(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.6));
+
+  /* ── Motion. Springs expressed as CSS easing for non-gesture transitions;
+     gesture-driven motion uses the JS spring module instead. ── */
+  --ease-spring: linear(
+    0, 0.0088 1.09%, 0.0344 2.18%, 0.1264 4.72%, 0.4103 11.62%, 0.5482 14.9%,
+    0.6714 18.35%, 0.7748 21.98%, 0.8582 25.79%, 0.9223 29.78%, 0.9686 34.13%,
+    0.9987 39.02%, 1.0154 44.28%, 1.0192 51.35%, 1.0091 66.23%, 1
+  );
+  --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --dur-fast: 180ms;
+  --dur-standard: 350ms;
+  --dur-move: 400ms;
+  --press-scale: 0.97;
+
+  /* ── Layout ── */
+  --measure: 62ch;
+  --gutter: clamp(1.25rem, 5vw, 2.5rem);
+  --wrap: 71rem;
+  --section-y: clamp(5rem, 10vw, 9rem);
 }
 
 html[lang="fa"] {
   --font-sans: var(--font-fa);
+  --measure: 58ch;
 }
 
 @layer base {
@@ -79,16 +129,16 @@ html[lang="fa"] {
     color: var(--color-label-1);
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
-    scroll-padding-top: 5.5rem;
-    text-rendering: optimizeLegibility;
+    scroll-padding-top: 6rem;
+    font-optical-sizing: auto;
   }
 
   body {
     margin: 0;
     font-size: 1.0625rem;
-    line-height: 1.6;
-    letter-spacing: 0;
+    line-height: 1.47;
     overflow-x: clip;
+    -webkit-font-smoothing: antialiased;
   }
 
   html[lang="fa"] body {
@@ -98,18 +148,27 @@ html[lang="fa"] {
   h1,
   h2,
   h3 {
-    text-wrap: balance;
-    font-weight: 650;
+    margin: 0;
   }
 
-  p {
+  /* `balance` runs a multi-pass line-breaker, so it is spent only where a
+     ragged last line is actually visible: the two display sizes. Applying it
+     to every h3 (there are forty) and `pretty` to every paragraph cost over a
+     second of style and layout on the Persian page, where shaping is far more
+     expensive than in Latin. */
+  .t-large-title,
+  .t-title-1 {
+    text-wrap: balance;
+  }
+
+  .t-lead {
     text-wrap: pretty;
   }
 
   :focus-visible {
     outline: 2px solid var(--color-tint);
     outline-offset: 3px;
-    border-radius: 4px;
+    border-radius: 6px;
   }
 
   ::selection {
@@ -120,7 +179,7 @@ html[lang="fa"] {
     color: inherit;
   }
 
-  /* Every interactive target is at least 44×44 CSS px. */
+  /* Every interactive target clears 44×44 CSS px. */
   a[href],
   button,
   summary,
@@ -131,7 +190,9 @@ html[lang="fa"] {
   }
 
   input,
-  textarea {
+  textarea,
+  select,
+  button {
     font: inherit;
   }
 }
@@ -139,25 +200,138 @@ html[lang="fa"] {
 @layer components {
   .wrap {
     width: 100%;
-    max-width: 68rem;
+    max-width: var(--wrap);
     margin-inline: auto;
-    padding-inline: clamp(1.25rem, 5vw, 2.5rem);
+    padding-inline: var(--gutter);
   }
 
   .section {
-    padding-block: clamp(4.5rem, 9vw, 8rem);
+    padding-block: var(--section-y);
+  }
+
+  /* Sections below the first two skip layout until they are near the viewport.
+     On the Persian page the whole document is roughly 2,400 words of a complex
+     script, and laying all of it out during load was the single largest block
+     of main-thread time. `auto` on contain-intrinsic-size makes the browser
+     remember each section's real height after the first pass, so the scrollbar
+     settles immediately and nothing shifts. */
+  .section-defer {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 720px;
   }
 
   .measure {
     max-width: var(--measure);
   }
 
+  /* ── Type scale. Tracking is size-specific: negative on display sizes,
+     ~0 on body, slightly positive on captions. Persian gets zero tracking
+     and taller leading — negative tracking breaks Arabic letter joining. ── */
+  .t-large-title {
+    font-size: clamp(2.5rem, 1.2rem + 5.6vw, 4.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.028em;
+    font-weight: 680;
+  }
+
+  .t-title-1 {
+    font-size: clamp(1.875rem, 1.15rem + 2.9vw, 3rem);
+    line-height: 1.1;
+    letter-spacing: -0.024em;
+    font-weight: 660;
+  }
+
+  .t-title-2 {
+    font-size: clamp(1.375rem, 1.1rem + 1.1vw, 1.75rem);
+    line-height: 1.2;
+    letter-spacing: -0.018em;
+    font-weight: 650;
+  }
+
+  .t-title-3 {
+    font-size: 1.1875rem;
+    line-height: 1.3;
+    letter-spacing: -0.012em;
+    font-weight: 640;
+  }
+
+  .t-headline {
+    font-size: 1.0625rem;
+    line-height: 1.4;
+    letter-spacing: -0.008em;
+    font-weight: 640;
+  }
+
+  .t-body {
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    letter-spacing: 0;
+  }
+
+  .t-callout {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .t-subhead {
+    font-size: 0.9375rem;
+    line-height: 1.45;
+  }
+
+  .t-footnote {
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    letter-spacing: 0.005em;
+  }
+
+  .t-caption {
+    font-size: 0.75rem;
+    line-height: 1.35;
+    letter-spacing: 0.01em;
+  }
+
+  .t-lead {
+    font-size: clamp(1.125rem, 1rem + 0.7vw, 1.4375rem);
+    line-height: 1.5;
+    letter-spacing: -0.012em;
+    color: var(--color-label-2);
+  }
+
+  html[lang="fa"] .t-large-title,
+  html[lang="fa"] .t-title-1,
+  html[lang="fa"] .t-title-2,
+  html[lang="fa"] .t-title-3,
+  html[lang="fa"] .t-headline,
+  html[lang="fa"] .t-lead,
+  html[lang="fa"] .t-footnote,
+  html[lang="fa"] .t-caption {
+    letter-spacing: 0;
+  }
+
+  html[lang="fa"] .t-large-title {
+    line-height: 1.32;
+  }
+  html[lang="fa"] .t-title-1 {
+    line-height: 1.38;
+  }
+  html[lang="fa"] .t-title-2 {
+    line-height: 1.5;
+  }
+  html[lang="fa"] .t-title-3,
+  html[lang="fa"] .t-headline {
+    line-height: 1.65;
+  }
+  html[lang="fa"] .t-lead {
+    line-height: 1.85;
+  }
+
   .eyebrow {
     font-size: 0.8125rem;
-    font-weight: 600;
+    font-weight: 620;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--color-tint);
+    margin: 0;
   }
 
   html[lang="fa"] .eyebrow {
@@ -165,54 +339,7 @@ html[lang="fa"] {
     text-transform: none;
   }
 
-  .display {
-    font-size: clamp(2.25rem, 1.3rem + 4.4vw, 4.25rem);
-    line-height: 1.06;
-    letter-spacing: -0.028em;
-    font-weight: 680;
-  }
-
-  html[lang="fa"] .display {
-    line-height: 1.28;
-    letter-spacing: 0;
-  }
-
-  .h2 {
-    font-size: clamp(1.75rem, 1.15rem + 2.4vw, 2.6rem);
-    line-height: 1.12;
-    letter-spacing: -0.022em;
-    font-weight: 660;
-  }
-
-  html[lang="fa"] .h2 {
-    line-height: 1.4;
-    letter-spacing: 0;
-  }
-
-  .h3 {
-    font-size: 1.1875rem;
-    line-height: 1.3;
-    letter-spacing: -0.012em;
-    font-weight: 640;
-  }
-
-  html[lang="fa"] .h3 {
-    line-height: 1.6;
-    letter-spacing: 0;
-  }
-
-  .lead {
-    font-size: clamp(1.0625rem, 0.95rem + 0.5vw, 1.3125rem);
-    line-height: 1.55;
-    color: var(--color-label-2);
-    letter-spacing: -0.01em;
-  }
-
-  html[lang="fa"] .lead {
-    line-height: 1.9;
-    letter-spacing: 0;
-  }
-
+  /* ── Content surfaces. Never glass. ── */
   .card {
     background: var(--color-bg-primary);
     border: 1px solid var(--color-separator);
@@ -221,35 +348,64 @@ html[lang="fa"] {
     box-shadow: var(--shadow-card);
   }
 
-  /* Translucency belongs only to floating chrome. Never to content. */
+  /* ── Liquid Glass. Floating chrome only. Never nested, never in a
+     scrolling list, never on content. ── */
   .glass {
-    background: var(--glass-bg);
-    -webkit-backdrop-filter: var(--glass-blur);
-    backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--color-separator);
-    box-shadow: var(--shadow-glass);
+    position: relative;
+    background: var(--glass-fill);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    box-shadow:
+      inset 0 1px 0 var(--glass-specular),
+      inset 0 0 0 0.5px var(--glass-edge),
+      var(--glass-shadow);
+    isolation: isolate;
   }
 
+  .glass-large {
+    background: var(--glass-fill-large);
+    -webkit-backdrop-filter: blur(var(--glass-blur-large))
+      saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur-large)) saturate(var(--glass-saturate));
+    box-shadow:
+      inset 0 1px 0 var(--glass-specular),
+      inset 0 0 0 0.5px var(--glass-edge),
+      var(--glass-shadow-large);
+  }
+
+  /* Text sitting on glass: heavier and higher contrast, never flat gray. */
+  .on-glass {
+    color: var(--color-label-1);
+    font-weight: 560;
+  }
+
+  /* ── Controls ── */
   .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    min-height: 48px;
-    padding-inline: 1.5rem;
-    border-radius: var(--radius-control);
-    font-weight: 600;
-    font-size: 1rem;
+    min-height: 50px;
+    padding-inline: 1.625rem;
+    border-radius: 999px;
+    font-size: 1.0625rem;
+    font-weight: 620;
     letter-spacing: -0.01em;
     text-decoration: none;
     border: 1px solid transparent;
     cursor: pointer;
-    transition: transform 0.3s var(--ease-spring), background-color 0.3s
-        var(--ease-spring), opacity 0.3s var(--ease-spring);
+    transition:
+      transform var(--dur-fast) var(--ease-out),
+      background-color var(--dur-fast) var(--ease-out),
+      opacity var(--dur-fast) var(--ease-out);
+  }
+
+  html[lang="fa"] .btn {
+    letter-spacing: 0;
   }
 
   .btn:active {
-    transform: scale(0.97);
+    transform: scale(var(--press-scale));
   }
 
   .btn-primary {
@@ -258,17 +414,30 @@ html[lang="fa"] {
   }
 
   .btn-primary:hover {
-    opacity: 0.88;
+    opacity: 0.9;
   }
 
   .btn-secondary {
-    background: transparent;
-    color: var(--color-tint);
-    border-color: var(--color-separator);
+    background: var(--color-fill-1);
+    color: var(--color-tint-on-fill);
   }
 
   .btn-secondary:hover {
-    background: var(--color-bg-secondary);
+    background: var(--color-fill-2);
+  }
+
+  .btn-plain {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    color: var(--color-tint);
+    font-weight: 620;
+    text-decoration: none;
+  }
+
+  .btn-plain:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
   .rule {
@@ -282,9 +451,9 @@ html[lang="fa"] {
     background: var(--color-bg-primary);
     border: 1px solid var(--color-separator);
     border-radius: var(--radius-control);
-    padding: 0.75rem 0.875rem;
+    padding: 0.8125rem 0.9375rem;
     color: var(--color-label-1);
-    transition: border-color 0.3s var(--ease-spring);
+    transition: border-color var(--dur-fast) var(--ease-out);
   }
 
   .field:focus {
@@ -292,18 +461,18 @@ html[lang="fa"] {
   }
 
   .field::placeholder {
-    color: var(--color-label-2);
-    opacity: 0.7;
+    color: var(--color-label-3);
   }
 }
 
 @layer utilities {
-  /* Scroll entrance. Fires once. Content is visible without JS. */
+  /* Scroll entrance. Content is fully visible without JS. */
   .js .reveal {
     opacity: 0;
-    transform: translateY(12px);
-    transition: opacity 0.45s var(--ease-spring), transform 0.45s
-        var(--ease-spring);
+    transform: translateY(14px);
+    transition:
+      opacity var(--dur-move) var(--ease-out),
+      transform var(--dur-move) var(--ease-spring);
   }
 
   .js .reveal.is-in {
@@ -322,9 +491,13 @@ html[lang="fa"] {
     white-space: nowrap;
     border: 0;
   }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
 }
 
-/* ── Accessibility escape hatches ─────────────────────────────── */
+/* ── Accessibility code paths ─────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -345,29 +518,36 @@ html[lang="fa"] {
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  .glass {
+  .glass,
+  .glass-large {
     background: var(--color-bg-primary);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
+    box-shadow:
+      inset 0 0 0 1px var(--color-separator),
+      var(--glass-shadow);
   }
 }
 
 @media (prefers-contrast: more) {
   :root {
-    --color-label-2: light-dark(#4b4b50, rgba(255, 255, 255, 0.86));
-    --color-label-3: light-dark(#4b4b50, rgba(255, 255, 255, 0.8));
+    --color-label-2: light-dark(#3f3f45, rgba(255, 255, 255, 0.9));
+    --color-label-3: light-dark(#4b4b50, rgba(255, 255, 255, 0.82));
     --color-separator: light-dark(rgba(0, 0, 0, 0.55), rgba(255, 255, 255, 0.6));
     --color-tint: light-dark(#0058b0, #4aa8ff);
     --color-tint-solid: light-dark(#00448a, #0a5ab8);
+    --color-tint-on-fill: light-dark(#004b96, #6ab8ff);
+  }
+  .glass,
+  .glass-large {
+    background: var(--color-bg-primary);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: inset 0 0 0 1px var(--color-separator-strong);
   }
   .card,
   .field {
     border-width: 1.5px;
-  }
-  .glass {
-    background: var(--color-bg-primary);
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
   }
 }
 

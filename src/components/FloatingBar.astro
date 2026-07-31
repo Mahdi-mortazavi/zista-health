@@ -10,29 +10,29 @@ const { copy: c } = Astro.props;
 
 <div class="bar-shell no-print" id="floating-bar" aria-hidden="true">
   <nav class="bar glass" aria-label={c.floating.label}>
-    <a href={c.channels.telegram.href} rel="noopener" tabindex="-1">
-      <Icons name="telegram" size={20} /><span>{c.floating.telegram}</span>
+    <a href={c.channels.telegram.href} rel="noopener" tabindex="-1" class="on-glass">
+      <Icons name="telegram" size={19} /><span>{c.floating.telegram}</span>
     </a>
     <span class="sep" aria-hidden="true"></span>
-    <a href={c.channels.whatsapp.href} rel="noopener" tabindex="-1">
-      <Icons name="whatsapp" size={20} /><span>{c.floating.whatsapp}</span>
+    <a href={c.channels.whatsapp.href} rel="noopener" tabindex="-1" class="on-glass">
+      <Icons name="whatsapp" size={19} /><span>{c.floating.whatsapp}</span>
     </a>
     <span class="sep" aria-hidden="true"></span>
-    <a href={c.channels.phone.href} tabindex="-1">
-      <Icons name="phone" size={20} /><span>{c.floating.call}</span>
+    <a href={c.channels.phone.href} tabindex="-1" class="on-glass">
+      <Icons name="phone" size={19} /><span>{c.floating.call}</span>
     </a>
   </nav>
 </div>
 
 <script>
-  // Appears after the first scroll, hides again at the top and while the
+  // Appears after the first screen, hides again at the top and while the
   // contact section is on screen, so it never covers what it points at.
   const shell = document.getElementById('floating-bar');
   const contact = document.getElementById('contact');
   if (shell) {
     let atContact = false;
     const setState = () => {
-      const show = window.scrollY > 400 && !atContact;
+      const show = window.scrollY > 500 && !atContact;
       shell.classList.toggle('is-on', show);
       shell.setAttribute('aria-hidden', show ? 'false' : 'true');
       shell.querySelectorAll('a').forEach((a) => a.setAttribute('tabindex', show ? '0' : '-1'));
@@ -40,7 +40,7 @@ const { copy: c } = Astro.props;
     if (contact) {
       new IntersectionObserver(
         ([e]) => {
-          atContact = e.isIntersecting;
+          atContact = e!.isIntersecting;
           setState();
         },
         { rootMargin: '0px 0px -30% 0px' }
@@ -61,9 +61,13 @@ const { copy: c } = Astro.props;
     justify-content: center;
     padding-inline: 1rem;
     pointer-events: none;
+    /* Materialises: scale and blur arrive together, so it reads as a surface
+       forming rather than a picture fading in. */
     opacity: 0;
-    transform: translateY(120%);
-    transition: opacity 0.35s var(--ease-spring), transform 0.35s var(--ease-spring);
+    transform: translateY(28px) scale(0.94);
+    transition:
+      opacity var(--dur-standard) var(--ease-out),
+      transform var(--dur-standard) var(--ease-spring);
   }
 
   .bar-shell.is-on {
@@ -76,7 +80,7 @@ const { copy: c } = Astro.props;
     display: flex;
     align-items: center;
     border-radius: 999px;
-    padding-inline: 0.375rem;
+    padding-inline: 0.3125rem;
     max-width: 100%;
   }
 
@@ -87,21 +91,26 @@ const { copy: c } = Astro.props;
     gap: 0.5rem;
     min-height: 48px;
     min-width: 48px;
-    padding-inline: 0.875rem;
+    padding-inline: 0.9375rem;
     border-radius: 999px;
     text-decoration: none;
     font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--color-label-1);
+    transition:
+      color var(--dur-fast) var(--ease-out),
+      transform var(--dur-fast) var(--ease-out);
   }
 
   .bar a:hover {
     color: var(--color-tint);
   }
 
+  .bar a:active {
+    transform: scale(var(--press-scale));
+  }
+
   .sep {
     inline-size: 1px;
-    block-size: 22px;
+    block-size: 20px;
     background: var(--color-separator);
     flex: 0 0 auto;
   }

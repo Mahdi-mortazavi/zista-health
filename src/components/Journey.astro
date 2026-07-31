@@ -1,0 +1,399 @@
+---
+import type { Copy } from '../content/types';
+import PhoneDemo from './PhoneDemo.astro';
+
+interface Props {
+  copy: Copy;
+}
+const { copy: c } = Astro.props;
+const roles = c.journey.roles;
+---
+
+<section class="section journey" id="people" aria-labelledby="people-h">
+  <div class="wrap">
+    <p class="eyebrow reveal">{c.journey.eyebrow}</p>
+    <h2 class="t-title-1 measure reveal" id="people-h">{c.journey.h2}</h2>
+    <p class="t-lead measure reveal intro">{c.journey.intro}</p>
+
+    <!-- Role picker. Glass because it floats over content and controls it;
+         one of the page's three glass layers. -->
+    <div class="segmented glass reveal" role="tablist" aria-label={c.journey.tabsLabel}>
+      <span class="seg-indicator" data-indicator aria-hidden="true"></span>
+      {
+        roles.map((r, i) => (
+          <button
+            type="button"
+            role="tab"
+            class="seg on-glass"
+            data-role-tab={r.value}
+            aria-selected={i === 0 ? 'true' : 'false'}
+            aria-controls={`journey-panel-${r.value}`}
+            id={`journey-tab-${r.value}`}
+          >
+            {r.tab}
+          </button>
+        ))
+      }
+    </div>
+
+    <div class="cols">
+      <div class="phone-col reveal">
+        <PhoneDemo copy={c} />
+      </div>
+
+      <div class="steps-col">
+        {
+          roles.map((r, i) => (
+            <div
+              class="panel"
+              id={`journey-panel-${r.value}`}
+              role="tabpanel"
+              aria-labelledby={`journey-tab-${r.value}`}
+              data-role-panel={r.value}
+              data-active={i === 0 ? 'true' : 'false'}
+              hidden={i !== 0}
+            >
+              <blockquote class="quote t-title-2">{r.quote}</blockquote>
+              <p class="lead-line t-callout">{r.lead}</p>
+              <ol class="steps">
+                {r.steps.map((s) => (
+                  <li class="step">
+                    <span class="step-n tabular" aria-hidden="true">{s.n}</span>
+                    <div>
+                      <h3 class="t-headline">{s.title}</h3>
+                      <p class="t-subhead step-body">{s.body}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { spring, SPRING, project, rubberband, VelocityTracker, prefersReducedMotion } from '../lib/spring';
+
+  const root = document.querySelector<HTMLElement>('.journey');
+
+  /**
+   * Nothing here is needed until the section is within reach, and running it
+   * during page load cost ~120ms of blocking time for a control the visitor
+   * cannot see yet. Two viewports of margin means it is always ready before it
+   * can be touched, while staying off the critical path.
+   */
+  function init(root: HTMLElement) {
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[data-role-tab]')];
+    const panels = [...root.querySelectorAll<HTMLElement>('[data-role-panel]')];
+    const panes = [...root.querySelectorAll<HTMLElement>('[data-role]')];
+    const indicator = root.querySelector<HTMLElement>('[data-indicator]')!;
+    const dots = [...root.querySelectorAll<HTMLButtonElement>('[data-dot]')];
+    const hint = root.querySelector<HTMLElement>('[data-hint]');
+    const phone = root.querySelector<HTMLElement>('.phone')!;
+
+    const rtl = document.documentElement.dir === 'rtl';
+    const dirSign = rtl ? -1 : 1;
+
+    let roleIndex = 0;
+    let screenIndex = 0;
+    let offset = 0; // current track translate, in percent of one screen
+    let stopSpring: (() => void) | null = null;
+
+    const activeTrack = () =>
+      panes[roleIndex]!.querySelector<HTMLElement>('[data-track]')!;
+
+    const paint = () => {
+      activeTrack().style.transform = `translate3d(${offset}%, 0, 0)`;
+    };
+
+    /** Re-target from wherever the track is right now, carrying velocity. */
+    const settle = (to: number, velocity = 0) => {
+      stopSpring?.();
+      stopSpring = spring(offset, to, { ...SPRING.sheet, velocity }, (v) => {
+        offset = v;
+        paint();
+      });
+    };
+
+    const setScreen = (i: number, velocity = 0) => {
+      screenIndex = Math.max(0, Math.min(dots.length - 1, i));
+      settle(-screenIndex * 100, velocity);
+      dots.forEach((d, di) => d.setAttribute('aria-selected', String(di === screenIndex)));
+      // The dot labels belong to the active role, so they change with it.
+      const names = roles()[roleIndex]!.screens;
+      dots.forEach((d, di) => {
+        const el = d.querySelector<HTMLElement>('[data-dot-name]');
+        if (el && names[di]) el.textContent = names[di]!;
+      });
+    };
+
+    /** Screen names per role, read straight out of the rendered markup so the
+        component stays the single source and nothing is duplicated in JS. */
+    const roles = () =>
+      panes.map((p) => ({
+        screens: [...p.querySelectorAll<HTMLElement>('.app-tabs span.is-on')].map(
+          (s) => s.textContent || ''
+        ),
+      }));
+
+    const moveIndicator = (animate = true) => {
+      const tab = tabs[roleIndex]!;
+      const parent = indicator.parentElement!;
+      const x = tab.offsetLeft - parent.clientLeft;
+      const w = tab.offsetWidth;
+      indicator.style.width = `${w}px`;
+      if (!animate || prefersReducedMotion()) {
+        indicator.style.transform = `translate3d(${x}px, 0, 0)`;
+        return;
+      }
+      const current = new DOMMatrixReadOnly(getComputedStyle(indicator).transform).m41;
+      spring(current, x, SPRING.standard, (v) => {
+        indicator.style.transform = `translate3d(${v}px, 0, 0)`;
+      });
+    };
+
+    const setRole = (i: number) => {
+      if (i === roleIndex) return;
+      roleIndex = i;
+      tabs.forEach((t, ti) => t.setAttribute('aria-selected', String(ti === i)));
+      panes.forEach((p, pi) => p.setAttribute('data-active', String(pi === i)));
+      panels.forEach((p, pi) => {
+        p.setAttribute('data-active', String(pi === i));
+        p.hidden = pi !== i;
+      });
+      moveIndicator();
+      // Every role opens on its first screen: arriving mid-flow is confusing.
+      offset = 0;
+      paint();
+      setScreen(0);
+    };
+
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', () => setRole(i));
+      t.addEventListener('keydown', (e) => {
+        if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+        e.preventDefault();
+        const delta = (e.key === 'ArrowRight' ? 1 : -1) * (rtl ? -1 : 1);
+        const next = (roleIndex + delta + tabs.length) % tabs.length;
+        setRole(next);
+        tabs[next]!.focus();
+      });
+    });
+
+    dots.forEach((d, i) => d.addEventListener('click', () => setScreen(i)));
+
+    // ── Drag. 1:1 tracking, rubber-banded at the ends, released into a
+    // spring that inherits the pointer's velocity and snaps to where the
+    // flick was heading rather than where the finger stopped. ──
+    const tracker = new VelocityTracker();
+    let dragging = false;
+    let startX = 0;
+    let startOffset = 0;
+    let moved = false;
+
+    phone.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      stopSpring?.();
+      dragging = true;
+      moved = false;
+      startX = e.clientX;
+      startOffset = offset;
+      tracker.reset();
+      tracker.add(e.clientX);
+      phone.setPointerCapture(e.pointerId);
+      phone.setAttribute('data-dragging', 'true');
+      hint?.setAttribute('data-hidden', 'true');
+    });
+
+    phone.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      const dxPx = (e.clientX - startX) * dirSign;
+      if (Math.abs(dxPx) > 8) moved = true;
+      tracker.add(e.clientX);
+      const w = phone.clientWidth || 1;
+      let next = startOffset + (dxPx / w) * 100;
+      const min = -(dots.length - 1) * 100;
+      if (next > 0) next = rubberband(next, 100);
+      else if (next < min) next = min + rubberband(next - min, 100);
+      offset = next;
+      paint();
+    });
+
+    const endDrag = (e: PointerEvent) => {
+      if (!dragging) return;
+      dragging = false;
+      phone.removeAttribute('data-dragging');
+      const w = phone.clientWidth || 1;
+      const vPx = tracker.get() * dirSign;
+      const vPct = (vPx / w) * 100;
+      if (!moved) return;
+      // Snap from the projected landing point, not the release point.
+      const projected = offset + project(vPct);
+      const target = Math.round(-projected / 100);
+      setScreen(target, vPct);
+      e.preventDefault();
+    };
+
+    phone.addEventListener('pointerup', endDrag);
+    phone.addEventListener('pointercancel', endDrag);
+
+    // Initial paint. The indicator needs layout, so wait a frame.
+    requestAnimationFrame(() => {
+      moveIndicator(false);
+      paint();
+    });
+    addEventListener('resize', () => moveIndicator(false), { passive: true });
+  }
+
+  if (root) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        init(root);
+      },
+      { rootMargin: '200% 0px' }
+    );
+    io.observe(root);
+  }
+</script>
+
+<style>
+  .journey {
+    background: var(--color-bg-primary);
+    border-block: 1px solid var(--color-separator);
+  }
+
+  h2 {
+    margin-block-start: 0.75rem;
+  }
+
+  .intro {
+    margin-block: 1.25rem 0;
+  }
+
+  /* ── Segmented control ─────────────────────────────────────── */
+  .segmented {
+    position: relative;
+    display: inline-flex;
+    margin-block-start: clamp(2rem, 4vw, 2.75rem);
+    padding: 4px;
+    border-radius: 999px;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .segmented::-webkit-scrollbar {
+    display: none;
+  }
+
+  .seg-indicator {
+    position: absolute;
+    inset-block: 4px;
+    inset-inline-start: 0;
+    left: 0;
+    border-radius: 999px;
+    background: var(--color-bg-primary);
+    box-shadow:
+      inset 0 1px 0 var(--glass-specular),
+      0 2px 6px light-dark(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5));
+    z-index: 0;
+    will-change: transform;
+  }
+
+  .seg {
+    position: relative;
+    z-index: 1;
+    appearance: none;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    padding-inline: clamp(0.875rem, 3vw, 1.375rem);
+    min-height: 44px;
+    border-radius: 999px;
+    font-size: 0.9375rem;
+    color: var(--color-label-2);
+    white-space: nowrap;
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .seg[aria-selected='true'] {
+    color: var(--color-label-1);
+  }
+
+  .seg:active {
+    transform: scale(var(--press-scale));
+  }
+
+  /* ── Layout ────────────────────────────────────────────────── */
+  .cols {
+    margin-block-start: clamp(2rem, 4vw, 3rem);
+    display: grid;
+    gap: clamp(2.5rem, 5vw, 3.5rem);
+    align-items: start;
+  }
+
+  .quote {
+    margin: 0;
+    max-width: 26ch;
+  }
+
+  .lead-line {
+    margin: 0.875rem 0 0;
+    color: var(--color-label-2);
+    max-width: var(--measure);
+  }
+
+  .steps {
+    list-style: none;
+    margin: clamp(1.75rem, 3vw, 2.25rem) 0 0;
+    padding: 0;
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.875rem;
+    align-items: start;
+  }
+
+  .step-n {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-tint);
+    padding-block-start: 0.25rem;
+  }
+
+  .step h3 {
+    margin: 0 0 0.25rem;
+  }
+
+  .step-body {
+    margin: 0;
+    color: var(--color-label-2);
+    max-width: 46ch;
+  }
+
+  @media (min-width: 64rem) {
+    .cols {
+      grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+      gap: 4rem;
+    }
+
+    .phone-col {
+      position: sticky;
+      top: 6.5rem;
+    }
+
+    /* Phone first in the source on mobile, still first visually on desktop. */
+    .steps-col {
+      padding-block-start: 0.5rem;
+    }
+  }
+</style>

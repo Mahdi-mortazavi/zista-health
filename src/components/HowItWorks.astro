@@ -10,14 +10,14 @@ const { copy: c } = Astro.props;
 <section class="section how" id="how" aria-labelledby="how-h">
   <div class="wrap">
     <p class="eyebrow reveal">{c.how.eyebrow}</p>
-    <h2 class="h2 measure reveal" id="how-h">{c.how.h2}</h2>
+    <h2 class="t-title-1 measure reveal" id="how-h">{c.how.h2}</h2>
 
     <ol class="steps">
       {c.how.steps.map((s, i) => (
         <li class="step reveal" style={`--d:${i * 60}ms`}>
           <span class="n" aria-hidden="true">{s.n}</span>
-          <h3 class="h3">{s.title}</h3>
-          <p class="body">{s.body}</p>
+          <h3 class="t-title-3">{s.title}</h3>
+          <p class="t-body body">{s.body}</p>
         </li>
       ))}
     </ol>

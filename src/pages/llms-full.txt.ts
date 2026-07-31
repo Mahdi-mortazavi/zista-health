@@ -20,9 +20,14 @@ function render(c: Copy, url: string): string {
   for (const b of c.gap.beats) p(`**${b.title}.** ${b.body}`);
   p(`**${c.gap.scenarioLabel}.** ${c.gap.scenario}`);
 
-  p(`## ${c.personas.eyebrow} — ${c.personas.h2}`);
-  p(c.personas.intro);
-  for (const x of c.personas.items) p(`**${x.role}.** ${x.quote} ${x.body}`);
+  p(`## ${c.journey.eyebrow} — ${c.journey.h2}`);
+  p(c.journey.intro);
+  p(`_${c.journey.previewBadge}_`);
+  for (const r of c.journey.roles) {
+    p(`### ${r.tab}`);
+    p(`${r.quote} ${r.lead}`);
+    for (const st of r.steps) p(`${st.n}. **${st.title}** ${st.body}`);
+  }
 
   p(`## ${c.how.eyebrow} — ${c.how.h2}`);
   for (const s of c.how.steps) p(`${s.n}. **${s.title}** ${s.body}`);

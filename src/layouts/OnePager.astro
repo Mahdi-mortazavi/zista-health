@@ -16,14 +16,14 @@ const home = c.locale === 'fa' ? '/' : '/en/';
       <p class="back no-print"><a href={home}>{c.onePager.back}</a></p>
 
       <header class="head">
-        <h1 class="h2">{c.onePager.title}</h1>
+        <h1 class="t-title-1">{c.onePager.title}</h1>
         <p class="sub">{c.onePager.subtitle}</p>
       </header>
 
       <dl class="rows">
         {c.onePager.sections.map((s) => (
           <div class="row">
-            <dt class="h3">{s.title}</dt>
+            <dt class="t-title-3">{s.title}</dt>
             <dd>{s.body}</dd>
           </div>
         ))}

@@ -17,11 +17,46 @@ export interface Beat {
   body: string;
 }
 
-export interface Persona {
-  id: string;
-  role: string;
-  quote: string;
+/** One row inside a mocked-up app screen. */
+export interface PhoneRow {
+  label: string;
+  value: string;
+  /** Drives the dot colour. `watch` is the accent, never red — nothing here is an emergency. */
+  state?: 'ok' | 'watch';
+}
+
+export interface PhoneScreen {
+  /** Short name shown under the phone, and the accessible name of its dot. */
+  tab: string;
+  /** Title bar inside the mocked app. */
+  title: string;
+  kind: 'status' | 'trend' | 'list' | 'access';
+  primary: string;
+  secondary: string;
+  rows?: PhoneRow[];
+  note?: string;
+  /** Optional button drawn inside the screen. Decorative — the mock is not interactive. */
+  cta?: string;
+  /** 14 values, 0–1, for the trend sparkline. Illustrative shape, not real data. */
+  series?: number[];
+}
+
+export interface JourneyStep {
+  n: string;
+  title: string;
   body: string;
+}
+
+export interface JourneyRole {
+  value: 'physician' | 'patient' | 'family';
+  /** Tab label. */
+  tab: string;
+  /** What this person says, in their own words. */
+  quote: string;
+  /** One sentence framing the flow below. */
+  lead: string;
+  steps: JourneyStep[];
+  screens: PhoneScreen[];
 }
 
 export interface Step {
@@ -95,11 +130,19 @@ export interface Copy {
     scenario: string;
   };
 
-  personas: {
+  journey: {
     eyebrow: string;
     h2: string;
     intro: string;
-    items: Persona[];
+    /** Says plainly that the phone is a design preview. Non-negotiable. */
+    previewBadge: string;
+    /** Instruction for the swipeable phone, announced to assistive tech too. */
+    hint: string;
+    /** Accessible label for the role tab list. */
+    tabsLabel: string;
+    /** Accessible label for the screen picker dots, e.g. "Screen". */
+    screenLabel: string;
+    roles: JourneyRole[];
   };
 
   how: {

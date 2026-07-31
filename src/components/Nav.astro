@@ -8,9 +8,13 @@ interface Props {
 const { copy: c } = Astro.props;
 ---
 
-<header class="nav-shell no-print">
+<!-- Sentinel. While it is on screen the page is at the top and the chrome
+     stays weightless; once it leaves, the glass and its scroll edge come in. -->
+<div class="sentinel" data-nav-sentinel aria-hidden="true"></div>
+
+<header class="nav-shell no-print" data-nav>
   <nav class="nav glass" aria-label={c.brand.legalName}>
-    <a class="brand" href={c.locale === 'fa' ? '/' : '/en/'}>
+    <a class="brand on-glass" href={c.locale === 'fa' ? '/' : '/en/'}>
       <span class="mark" aria-hidden="true"><Icons name="ring" size={22} /></span>
       <span class="brand-name">{c.brand.name}</span>
       <span class="visually-hidden">{c.brand.legalName}</span>
@@ -18,33 +22,79 @@ const { copy: c } = Astro.props;
 
     <ul class="links" aria-label={c.nav.menu}>
       {c.nav.links.map((l) => (
-        <li><a href={l.href}>{l.label}</a></li>
+        <li><a class="on-glass" href={l.href}>{l.label}</a></li>
       ))}
     </ul>
 
-    <a class="lang" href={c.nav.langSwitchHref} hreflang={c.locale === 'fa' ? 'en' : 'fa'} lang={c.locale === 'fa' ? 'en' : 'fa'}>
+    <a
+      class="lang on-glass"
+      href={c.nav.langSwitchHref}
+      hreflang={c.locale === 'fa' ? 'en' : 'fa'}
+      lang={c.locale === 'fa' ? 'en' : 'fa'}
+    >
       {c.nav.langSwitch}
     </a>
   </nav>
 </header>
 
+<script>
+  // The nav only becomes a material once content is actually behind it.
+  const sentinel = document.querySelector('[data-nav-sentinel]');
+  const shell = document.querySelector('[data-nav]');
+  if (sentinel && shell) {
+    new IntersectionObserver(
+      ([e]) => shell.setAttribute('data-scrolled', String(!e!.isIntersecting)),
+      { threshold: 0 }
+    ).observe(sentinel);
+  }
+</script>
+
 <style>
+  .sentinel {
+    position: absolute;
+    top: 0;
+    height: 1px;
+    width: 100%;
+    pointer-events: none;
+  }
+
   .nav-shell {
     position: sticky;
     inset-block-start: 0;
     z-index: 40;
-    padding: 0.625rem clamp(0.75rem, 4vw, 1.5rem) 0;
+    padding: 0.625rem var(--gutter) 0;
   }
 
   .nav {
     display: flex;
     align-items: center;
     gap: 1rem;
-    max-width: 68rem;
+    max-width: var(--wrap);
     margin-inline: auto;
-    padding-inline: 0.875rem;
-    border-radius: var(--radius-glass);
-    min-height: 52px;
+    padding-inline: 0.5rem 0.5rem;
+    border-radius: 999px;
+    min-height: 54px;
+    /* At the top of the page the bar is invisible chrome; it materialises
+       (blur and fill together, not a fade) once anything scrolls under it. */
+    background: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: none;
+    transition:
+      background-color var(--dur-standard) var(--ease-out),
+      box-shadow var(--dur-standard) var(--ease-out),
+      -webkit-backdrop-filter var(--dur-standard) var(--ease-out),
+      backdrop-filter var(--dur-standard) var(--ease-out);
+  }
+
+  .nav-shell[data-scrolled='true'] .nav {
+    background: var(--glass-fill);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    box-shadow:
+      inset 0 1px 0 var(--glass-specular),
+      inset 0 0 0 0.5px var(--glass-edge),
+      var(--glass-shadow);
   }
 
   .brand {
@@ -54,8 +104,8 @@ const { copy: c } = Astro.props;
     text-decoration: none;
     font-weight: 680;
     letter-spacing: -0.02em;
-    color: var(--color-label-1);
-    padding-inline-end: 0.25rem;
+    padding-inline: 0.625rem;
+    border-radius: 999px;
   }
 
   :global(html[lang='fa']) .brand {
@@ -74,40 +124,49 @@ const { copy: c } = Astro.props;
   .links {
     display: none;
     list-style: none;
-    margin: 0;
+    margin: 0 0 0 auto;
     padding: 0;
-    gap: 0.25rem;
+    gap: 0.125rem;
     margin-inline-start: auto;
   }
 
   .links a {
     display: inline-flex;
     align-items: center;
-    padding-inline: 0.625rem;
+    padding-inline: 0.75rem;
     font-size: 0.875rem;
     color: var(--color-label-2);
     text-decoration: none;
-    border-radius: var(--radius-control);
-    transition: color 0.3s var(--ease-spring);
+    border-radius: 999px;
+    font-weight: 540;
+    transition:
+      color var(--dur-fast) var(--ease-out),
+      background-color var(--dur-fast) var(--ease-out);
   }
 
   .links a:hover {
     color: var(--color-label-1);
+    background: var(--color-fill-1);
   }
 
   .lang {
     margin-inline-start: auto;
     display: inline-flex;
     align-items: center;
-    padding-inline: 0.875rem;
-    min-width: 44px;
     justify-content: center;
+    padding-inline: 0.9375rem;
+    min-width: 44px;
     font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--color-tint);
+    font-weight: 620;
+    color: var(--color-tint-on-fill);
     text-decoration: none;
-    border: 1px solid var(--color-separator);
-    border-radius: var(--radius-control);
+    background: var(--color-fill-1);
+    border-radius: 999px;
+    transition: background-color var(--dur-fast) var(--ease-out);
+  }
+
+  .lang:hover {
+    background: var(--color-fill-2);
   }
 
   @media (min-width: 64rem) {

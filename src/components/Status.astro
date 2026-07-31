@@ -7,17 +7,17 @@ interface Props {
 const { copy: c } = Astro.props;
 ---
 
-<section class="section status" id="status" aria-labelledby="status-h">
+<section class="section section-defer status" id="status" aria-labelledby="status-h">
   <div class="wrap">
     <p class="eyebrow reveal">{c.status.eyebrow}</p>
-    <h2 class="h2 measure reveal" id="status-h">{c.status.h2}</h2>
-    <p class="lead measure reveal intro">{c.status.intro}</p>
+    <h2 class="t-title-1 measure reveal" id="status-h">{c.status.h2}</h2>
+    <p class="t-lead measure reveal intro">{c.status.intro}</p>
 
     <dl class="rows">
       {c.status.rows.map((r, i) => (
         <div class="row reveal" style={`--d:${i * 45}ms`}>
-          <dt class="h3">{r.title}</dt>
-          <dd class="body">{r.body}</dd>
+          <dt class="t-title-3">{r.title}</dt>
+          <dd class="t-body body">{r.body}</dd>
         </div>
       ))}
     </dl>

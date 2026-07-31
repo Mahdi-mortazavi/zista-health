@@ -10,13 +10,13 @@ const { copy: c } = Astro.props;
 <section class="section gap" id="gap" aria-labelledby="gap-h">
   <div class="wrap">
     <p class="eyebrow reveal">{c.gap.eyebrow}</p>
-    <h2 class="h2 measure reveal" id="gap-h">{c.gap.h2}</h2>
+    <h2 class="t-title-1 measure reveal" id="gap-h">{c.gap.h2}</h2>
 
     <ol class="beats">
       {c.gap.beats.map((b, i) => (
         <li class="beat reveal" style={`--d:${i * 60}ms`}>
-          <h3 class="h3">{b.title}</h3>
-          <p class="body">{b.body}</p>
+          <h3 class="t-title-3">{b.title}</h3>
+          <p class="t-body body">{b.body}</p>
         </li>
       ))}
     </ol>

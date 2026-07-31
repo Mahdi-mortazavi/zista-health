@@ -8,17 +8,17 @@ interface Props {
 const { copy: c } = Astro.props;
 ---
 
-<section class="section invest" id="invest" aria-labelledby="invest-h">
+<section class="section section-defer invest" id="invest" aria-labelledby="invest-h">
   <div class="wrap">
     <p class="eyebrow reveal">{c.investors.eyebrow}</p>
-    <h2 class="h2 measure reveal" id="invest-h">{c.investors.h2}</h2>
-    <p class="lead measure reveal intro">{c.investors.summary}</p>
+    <h2 class="t-title-1 measure reveal" id="invest-h">{c.investors.h2}</h2>
+    <p class="t-lead measure reveal intro">{c.investors.summary}</p>
 
     <dl class="blocks">
       {c.investors.blocks.map((b, i) => (
         <div class="block reveal" style={`--d:${i * 45}ms`}>
-          <dt class="h3">{b.title}</dt>
-          <dd class="body">{b.body}</dd>
+          <dt class="t-title-3">{b.title}</dt>
+          <dd class="t-body body">{b.body}</dd>
         </div>
       ))}
     </dl>

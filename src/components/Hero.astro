@@ -11,8 +11,8 @@ const { copy: c } = Astro.props;
 <section class="hero" id="top">
   <div class="wrap">
     <p class="eyebrow">{c.hero.eyebrow}</p>
-    <h1 class="display">{c.hero.h1}</h1>
-    <p class="lead measure sub">{c.hero.sub}</p>
+    <h1 class="t-large-title">{c.hero.h1}</h1>
+    <p class="t-lead measure sub">{c.hero.sub}</p>
     <div class="ctas">
       <a class="btn btn-primary" href={c.hero.ctaPrimary.href}>{c.hero.ctaPrimary.label}</a>
       <a class="btn btn-secondary" href={c.hero.ctaSecondary.href}>{c.hero.ctaSecondary.label}</a>
@@ -25,31 +25,59 @@ const { copy: c } = Astro.props;
 
 <style>
   .hero {
-    padding-block: clamp(3rem, 8vw, 6rem) 0;
+    position: relative;
+    padding-block: clamp(3.5rem, 9vw, 7rem) 0;
     background: var(--color-bg-canvas);
+    overflow: clip;
+  }
+
+  /* A single soft bloom behind the headline. Not a gradient wash — one light
+     source, the way an Apple product page lights the hero. */
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset-block-start: -18%;
+    inset-inline-start: 50%;
+    translate: -50% 0;
+    inline-size: min(70rem, 130%);
+    aspect-ratio: 2 / 1;
+    background: radial-gradient(
+      50% 50% at 50% 50%,
+      color-mix(in srgb, var(--color-tint) 13%, transparent),
+      transparent 70%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
   }
 
   h1 {
-    margin: 0.75rem 0 0;
-    max-width: 18ch;
+    margin-block-start: 0.875rem;
+    max-width: 17ch;
   }
 
   :global(html[lang='fa']) h1 {
-    max-width: 22ch;
+    max-width: 21ch;
   }
 
   .sub {
-    margin-block: 1.5rem 0;
+    margin-block: 1.75rem 0;
   }
 
   .ctas {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
-    margin-block-start: 2.25rem;
+    margin-block-start: 2.5rem;
   }
 
   .visual {
+    position: relative;
+    z-index: 1;
     margin-block-start: clamp(2.5rem, 6vw, 4rem);
     padding-block-end: clamp(2rem, 5vw, 3.5rem);
   }

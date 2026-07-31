@@ -8,17 +8,17 @@ interface Props {
 const { copy: c } = Astro.props;
 ---
 
-<section class="section" id="paths" aria-labelledby="paths-h">
+<section class="section section-defer" id="paths" aria-labelledby="paths-h">
   <div class="wrap">
     <p class="eyebrow reveal">{c.paths.eyebrow}</p>
-    <h2 class="h2 measure reveal" id="paths-h">{c.paths.h2}</h2>
-    <p class="lead measure reveal intro">{c.paths.intro}</p>
+    <h2 class="t-title-1 measure reveal" id="paths-h">{c.paths.h2}</h2>
+    <p class="t-lead measure reveal intro">{c.paths.intro}</p>
 
     <ul class="grid">
       {c.paths.items.map((p, i) => (
         <li class="card path reveal" style={`--d:${(i % 2) * 60}ms`}>
-          <h3 class="h3">{p.title}</h3>
-          <p class="body">{p.body}</p>
+          <h3 class="t-title-3">{p.title}</h3>
+          <p class="t-body body">{p.body}</p>
           <a class="go" href={`#contact`} data-path={p.value}>
             {p.cta}
             <Icons name="arrow" size={18} />

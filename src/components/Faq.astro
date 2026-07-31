@@ -12,16 +12,16 @@ const { copy: c } = Astro.props;
   is written to make sense quoted on its own, because that is what an AI
   assistant will do with it.
 -->
-<section class="section" id="faq" aria-labelledby="faq-h">
+<section class="section section-defer" id="faq" aria-labelledby="faq-h">
   <div class="wrap">
     <p class="eyebrow reveal">{c.faq.eyebrow}</p>
-    <h2 class="h2 measure reveal" id="faq-h">{c.faq.h2}</h2>
+    <h2 class="t-title-1 measure reveal" id="faq-h">{c.faq.h2}</h2>
 
     <div class="items">
       {c.faq.items.map((item, i) => (
         <article class="item reveal" style={`--d:${(i % 2) * 45}ms`}>
-          <h3 class="h3">{item.q}</h3>
-          <p class="answer">{item.a}</p>
+          <h3 class="t-title-3">{item.q}</h3>
+          <p class="t-body answer">{item.a}</p>
         </article>
       ))}
     </div>

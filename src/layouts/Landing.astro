@@ -3,7 +3,7 @@ import BaseLayout from './BaseLayout.astro';
 import Nav from '../components/Nav.astro';
 import Hero from '../components/Hero.astro';
 import Gap from '../components/Gap.astro';
-import Personas from '../components/Personas.astro';
+import Journey from '../components/Journey.astro';
 import HowItWorks from '../components/HowItWorks.astro';
 import Signals from '../components/Signals.astro';
 import Status from '../components/Status.astro';
@@ -28,8 +28,8 @@ const { copy, path } = Astro.props;
   <main id="main">
     <Hero copy={copy} />
     <Gap copy={copy} />
-    <Personas copy={copy} />
     <HowItWorks copy={copy} />
+    <Journey copy={copy} />
     <Signals copy={copy} />
     <Status copy={copy} />
     <Paths copy={copy} />
