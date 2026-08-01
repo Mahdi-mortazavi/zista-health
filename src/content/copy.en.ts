@@ -57,7 +57,7 @@ export const en: Copy = {
   hero: {
     eyebrow: 'Zista Health',
     h1: 'Health doesn’t fail suddenly. It fails quietly first.',
-    sub: 'Zista is a remote patient monitoring platform. A ring worn day and night measures the signals between two appointments, and tells the patient, the physician and the family when something changes.',
+    sub: 'Zista monitors patients remotely. One ring, worn day and night. It watches the stretch between two appointments, and when something changes it tells the patient, their doctor and their family.',
     ctaPrimary: { label: 'Start a conversation', href: '#contact' },
     ctaSecondary: { label: 'Where we are today', href: '#status' },
     visualAlt:
@@ -77,11 +77,11 @@ export const en: Copy = {
     beats: [
       {
         title: 'What happens today',
-        body: 'A blood pressure cuff in a clinic. An oxygen clip in a waiting room. A question about how sleep has been, answered from memory. Two or three snapshots a year, taken on the patient’s best behaviour, in a room that makes everyone’s heart rate higher than usual.',
+        body: 'A blood pressure cuff in a clinic. An oxygen clip in a waiting room. A question about sleep, answered from memory. Two or three snapshots a year — taken on the patient’s best behaviour, in a room that raises everyone’s heart rate.',
       },
       {
         title: 'What gets missed',
-        body: 'Resting heart rate climbing a little each week. Oxygen dipping at three in the morning, every night, for a month. Sleep breaking into shorter and shorter pieces. On its own each of these is nothing. Together they are a trend, and a trend is the thing a clinician can actually act on.',
+        body: 'Resting heart rate climbing a little each week. Oxygen dipping at three in the morning, every night, for a month. Sleep breaking into shorter pieces. On its own each of these is nothing. Together they are a trend — and a clinician acts on trends, not on single readings.',
       },
       {
         title: 'What it costs',
@@ -97,7 +97,7 @@ export const en: Copy = {
     eyebrow: 'Three people, one thread',
     h2: 'One stream of data. Three different journeys.',
     intro:
-      'A measurement is only useful if it reaches someone who can act on it. Zista sends one continuous stream to three people and designs a separate path for each. Pick the one you are.',
+      'A number on its own does nothing. It has to reach someone who can act on it. Zista sends the same stream to three people and builds a separate path for each. Pick the one you are.',
     previewBadge: 'Design preview — no product has shipped',
     hint: 'Swipe to see the other screens',
     tabsLabel: 'Choose a role',
@@ -117,7 +117,7 @@ export const en: Copy = {
           {
             n: '02',
             title: 'Two weeks builds your baseline',
-            body: 'Zista never compares you to anyone else. It first learns what normal looks like for you, then judges against that.',
+            body: 'Zista never compares you to anyone else. It learns what normal looks like for you, then measures against only that.',
           },
           {
             n: '03',
@@ -174,7 +174,7 @@ export const en: Copy = {
         value: 'physician',
         tab: 'Physician',
         quote: '“I need continuity, not more noise.”',
-        lead: 'The goal is that fifteen seconds before you walk into the room, you know what happened between visits.',
+        lead: 'The goal is simple: fifteen seconds before you walk into the room, you know what happened between visits.',
         steps: [
           {
             n: '01',
@@ -184,7 +184,7 @@ export const en: Copy = {
           {
             n: '02',
             title: 'You set the thresholds yourself',
-            body: 'Per patient. A heart failure patient and a sleep apnea patient do not share a threshold, and we should not be deciding that for you.',
+            body: 'Per patient. A heart failure patient and a sleep apnea patient do not share a threshold, and that call is not ours to make.',
           },
           {
             n: '03',
@@ -332,7 +332,7 @@ export const en: Copy = {
     eyebrow: 'What Zista measures',
     h2: 'Measurements, not conclusions.',
     intro:
-      'Nothing in this list is a diagnosis. These are physiological signals, and their value is not in any single reading. It is in the change over days and weeks.',
+      'None of this is a diagnosis. These are just measurements. Their value is not in the number itself, but in how it changes over days and weeks.',
     items: [
       {
         name: 'Heart rate',
@@ -341,7 +341,7 @@ export const en: Copy = {
       },
       {
         name: 'Heart rate variability',
-        body: 'A measure of autonomic balance. Meaningful only against a person’s own baseline, never compared between two people.',
+        body: 'A sign of how balanced the nervous system is. It only means anything measured against that person’s own normal, never against someone else’s.',
         status: 'evaluating',
       },
       {
@@ -351,17 +351,17 @@ export const en: Copy = {
       },
       {
         name: 'Respiration rate',
-        body: 'Derived from the pulse waveform during rest, so it needs no separate sensor and no effort from the patient.',
+        body: 'Read from the pulse waveform itself during rest. No separate sensor, and nothing for the patient to do.',
         status: 'evaluating',
       },
       {
         name: 'Skin temperature',
-        body: 'Read as a deviation from the wearer’s own baseline rather than as a fever number, because peripheral temperature is not core temperature.',
+        body: 'Read as distance from the wearer’s own normal rather than as a fever number. Skin temperature is not the temperature inside the body.',
         status: 'evaluating',
       },
       {
         name: 'Sleep',
-        body: 'Duration, timing and fragmentation. How broken the night was is often the earliest thing to change.',
+        body: 'How long, what time, and how many pieces. How broken the night was is often the first thing to change.',
         status: 'evaluating',
       },
       {
@@ -379,7 +379,7 @@ export const en: Copy = {
       evaluating: 'In the hardware under evaluation',
       planned: 'Planned',
     },
-    note: 'No signal on this list has been validated by us against a clinical reference instrument yet. That work is described below, in Where we are today.',
+    note: 'We have not yet checked any of these against a clinical reference instrument. That work is described below, in Where we are today.',
   },
 
   status: {
@@ -394,15 +394,15 @@ export const en: Copy = {
       },
       {
         title: 'Hardware: under evaluation',
-        body: 'We are evaluating ring hardware with a manufacturing partner. The sensor set above is what that hardware reports. We have not committed to a final supplier, and the evaluation may change what the first device measures.',
+        body: 'We are evaluating ring hardware with a manufacturing partner. The sensors listed above are what that hardware reports. No final supplier is chosen yet, and the evaluation may change what the first device measures.',
       },
       {
         title: 'Clinical validation: planned, not done',
-        body: 'Before Zista makes any accuracy claim, we intend to run a comparison against reference instruments and publish the method and the results, including the places where we fall short. Until that exists, treat every measurement here as unvalidated.',
+        body: 'Before we say anything about accuracy, we will compare our own readings against reference instruments and publish the method and the results — including where we fall short. Until that report exists, treat every number on this page as unchecked.',
       },
       {
         title: 'Regulation: started, not finished',
-        body: 'Zista is not a certified medical device and holds no CE, FDA or IMED clearance. We have begun the Iranian regulatory path and are keeping design and risk documentation to a quality-system standard from the start, rather than retrofitting it after the fact.',
+        body: 'Zista is not a certified medical device and holds no CE, FDA or IMED clearance. We have started the Iranian regulatory path, and we have been keeping design and risk records in order since day one rather than assembling them at the end.',
       },
       {
         title: 'Team: one founder, hiring',
@@ -453,11 +453,11 @@ export const en: Copy = {
     blocks: [
       {
         title: 'The cost of the status quo',
-        body: 'Most of the money spent on chronic disease is not spent in the clinic. It is spent on readmissions and emergency admissions, and a large share of those are preceded by days of change that nobody measured. The status quo is not cheap. It is only invisible.',
+        body: 'Most of the money spent on chronic disease is not spent in the clinic. It is spent on readmissions and emergency admissions — and most of those follow days of change that nobody measured. The status quo is not cheap. It is only invisible.',
       },
       {
         title: 'The wedge: start narrow',
-        body: 'Two use cases first. Continuous monitoring for cardiac and respiratory patients in the weeks after discharge, and overnight screening for sleep apnea. Both are conditions where a nightly signal is worth more than a clinic visit, and where the current alternative is either nothing at all or an expensive night in a sleep lab.',
+        body: 'Two use cases to start. Monitoring cardiac and respiratory patients in the weeks after discharge, and overnight screening for sleep apnea. In both, one night of measurement says more than one clinic visit — and the current alternative is either nothing at all or an expensive night in a sleep lab.',
       },
       {
         title: 'Why now',
@@ -465,7 +465,7 @@ export const en: Copy = {
       },
       {
         title: 'The market',
-        body: 'Iran: a large population, an ageing cohort growing faster than the health system is, high smartphone use, and a private clinic sector that buys its own tools without waiting for a national procurement cycle. International expansion is a later question, not this one.',
+        body: 'Iran: a large population, an older cohort growing faster than the health system, smartphones everywhere, and private clinics that buy their own tools without waiting on state budgets. International expansion is a later question.',
       },
       {
         title: 'What we are raising for',
@@ -491,11 +491,11 @@ export const en: Copy = {
       },
       {
         q: 'What does Zista actually measure?',
-        a: 'Zista measures heart rate, heart rate variability, blood oxygen, respiration rate, skin temperature, sleep and movement, using a ring worn day and night. A single-lead ECG chest band is planned as a separate device. The value of Zista is not in any single reading but in how those readings change over days and weeks against a person’s own baseline.',
+        a: 'Zista measures heart rate, heart rate variability, blood oxygen, respiration rate, skin temperature, sleep and movement, using a ring worn day and night. A single-lead ECG chest band is planned separately. The value of Zista is not in any single reading, but in how those readings change over days and weeks against that person’s own normal.',
       },
       {
         q: 'How is Zista different from a smartwatch?',
-        a: 'A smartwatch is built for a healthy person who wants to look at their own numbers. Zista Health is built for a patient, their physician and their family at the same time: the same continuous data reaches all three, phrased differently for each, inside an existing clinical relationship rather than as a fitness score. Zista is also designed around a patient who may not want to interact with an app at all.',
+        a: 'A smartwatch is built for a healthy person who wants to look at their own numbers. Zista Health is built for three people: a patient, their doctor, and one family member. The same data reaches all three, phrased in the language each of them needs. Zista is also designed for a patient who may never want to open an app at all.',
       },
       {
         q: 'Is my data private, and who can see it?',
@@ -503,11 +503,11 @@ export const en: Copy = {
       },
       {
         q: 'Does Zista work without an internet connection?',
-        a: 'The Zista ring stores measurements on the device and syncs when a phone is in range, so short gaps in connectivity do not lose data. Live alerts do require a connection. Zista is being designed for intermittent connectivity because that is the normal condition across much of Iran, not an edge case.',
+        a: 'The Zista ring keeps measurements on the device and sends them whenever a phone is in range, so a short outage loses nothing. Only live alerts need a connection. Zista is designed for patchy connectivity from the start, because across much of Iran that is the normal condition.',
       },
       {
         q: 'Can Zista predict a heart attack or detect a disease?',
-        a: 'No. Zista does not predict, detect or diagnose any disease, and any consumer product claiming otherwise should be read very carefully. Zista measures physiological signals continuously and flags when they drift away from a person’s own baseline. What that drift means is a clinical question, and it belongs to a doctor.',
+        a: 'No. Zista does not predict, detect or diagnose any disease, and any consumer product claiming otherwise should be read very carefully. Zista measures continuously and flags it when the numbers drift away from that person’s own normal. What the drift means is a clinical question, and it belongs to a doctor.',
       },
       {
         q: 'Can I buy Zista? Is it available yet?',
@@ -532,7 +532,7 @@ export const en: Copy = {
     eyebrow: 'Contact',
     h2: 'Talk to the person building it.',
     intro:
-      'There is no sales team. Messages go straight to the founder’s phone, and are usually answered the same day.',
+      'There is no sales team. A message lands on the founder’s phone and usually gets an answer the same day.',
     channelsLabel: 'Direct channels',
     formLabel: 'Or write a few lines',
     progress: 'Step 2 of 3',
